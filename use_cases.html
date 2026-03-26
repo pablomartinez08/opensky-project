@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casos de Uso — Sistema de Detección de Anomalías de Vuelo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 50px 20px;
+    }
+
+    /* ——— Header ——— */
+    .page-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #58a6ff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .page-header .subtitle {
+      font-size: 0.85rem;
+      color: #8b949e;
+    }
+
+    /* ——— Grid de tarjetas ——— */
+    .cases-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ——— Tarjeta de caso de uso ——— */
+    .use-case-card {
+      background: #161b22;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .use-case-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Banda de color superior */
+    .card-accent {
+      height: 4px;
+    }
+
+    /* Cabecera de la tarjeta */
+    .card-header {
+      padding: 28px 32px 0 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .card-icon {
+      font-size: 2rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #e6edf3;
+      line-height: 1.3;
+    }
+    .card-header .case-id {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    /* Cuerpo */
+    .card-body {
+      padding: 20px 32px 28px 32px;
+    }
+    .card-body p {
+      font-size: 0.88rem;
+      color: #8b949e;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .card-body p strong {
+      color: #c9d1d9;
+    }
+
+    /* Tags de tecnología */
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .tech-tag {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Contenedor del diagrama Mermaid */
+    .diagram-wrapper {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 24px 16px;
+      margin-top: 10px;
+      overflow-x: auto;
+    }
+    .diagram-wrapper .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* JSON de ejemplo */
+    .json-example {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-top: 12px;
+      overflow-x: auto;
+    }
+    .json-example .json-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #8b949e;
+      margin-bottom: 10px;
+    }
+    .json-example pre {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: #e6edf3;
+      white-space: pre;
+    }
+    .json-key { color: #79c0ff; }
+    .json-string { color: #a5d6ff; }
+    .json-number { color: #f2cc60; }
+    .json-bool { color: #ff7b72; }
+
+    /* Separador entre secciones */
+    .section-divider {
+      text-align: center;
+      margin: 20px 0;
+      color: #30363d;
+      font-size: 1.5rem;
+      letter-spacing: 8px;
+    }
+
+    /* Overrides Mermaid */
+    .mermaid .edgeLabel {
+      font-size: 10px !important;
+      font-family: 'Inter', sans-serif !important;
+    }
+    .mermaid .nodeLabel {
+      font-family: 'Inter', sans-serif !important;
+      font-weight: 600 !important;
+      font-size: 12px !important;
+    }
+
+    /* Footer */
+    .page-footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 1px solid #21262d;
+      color: #484f58;
+      font-size: 0.75rem;
+    }
+
+    /* ——— Colores por caso ——— */
+    .accent-red { background: linear-gradient(90deg, #f43f5e, #e11d48); }
+    .accent-orange { background: linear-gradient(90deg, #f97316, #ea580c); }
+    .accent-blue { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+    .accent-purple { background: linear-gradient(90deg, #a855f7, #9333ea); }
+
+    .icon-red { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+    .icon-orange { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+    .icon-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+    .icon-purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+
+    .case-id-red { color: #f43f5e; }
+    .case-id-orange { color: #f97316; }
+    .case-id-blue { color: #3b82f6; }
+    .case-id-purple { color: #a855f7; }
+
+    .tag-flink { background: rgba(244,63,94,0.12); color: #fb7185; border: 1px solid rgba(244,63,94,0.25); }
+    .tag-kafka { background: rgba(249,115,22,0.12); color: #fdba74; border: 1px solid rgba(249,115,22,0.25); }
+    .tag-state { background: rgba(59,130,246,0.12); color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); }
+    .tag-window { background: rgba(168,85,247,0.12); color: #c4b5fd; border: 1px solid rgba(168,85,247,0.25); }
+    .tag-cep { background: rgba(236,72,153,0.12); color: #f9a8d4; border: 1px solid rgba(236,72,153,0.25); }
+    .tag-h3 { background: rgba(34,211,238,0.12); color: #67e8f9; border: 1px solid rgba(34,211,238,0.25); }
+  </style>
+</head>
+<body>
+
+  <!-- ====== HEADER ====== -->
+  <div class="page-header">
+    <h1>📋 Casos de Uso — Detección de Anomalías de Vuelo</h1>
+    <p class="subtitle">Descripción funcional de cada tipo de alerta procesada por Apache Flink</p>
+  </div>
+
+  <div class="cases-grid">
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- CASO 1: Alerta Vertical                         -->
+    <!-- ════════════════════════════════════════════════ -->
+    <div class="use-case-card">
+      <div class="card-accent accent-red"></div>
+      <div class="card-header">
+        <div class="card-icon icon-red">📉</div>
+        <div>
+          <div class="case-id case-id-red">UC-01</div>
+          <h2>Alerta Vertical — Ascenso / Descenso Brusco</h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>
+          Detecta cuando una aeronave experimenta un <strong>cambio de altitud anómalo</strong> en un periodo corto de tiempo.
+          Flink mantiene un <strong>ValueState</strong> con el historial reciente de altitudes por cada <code>icao24</code>.
+          Si la diferencia entre la altitud actual y la de hace <strong>N segundos</strong> supera un umbral definido (ej. ±2.000 metros en 30 segundos),
+          se genera una alerta de severidad proporcional al delta.
+        </p>
+        <p>
+          <strong>Ejemplo real:</strong> Un avión desciende de 11.200m a 8.900m en 20 segundos — posible emergencia, turbulencia severa o evasión de colisión (TCAS RA).
+        </p>
+
+        <div class="tech-tags">
+          <span class="tech-tag tag-flink">keyBy(icao24)</span>
+          <span class="tech-tag tag-state">ValueState</span>
+          <span class="tech-tag tag-flink">ProcessFunction</span>
+          <span class="tech-tag tag-kafka">flight-alerts</span>
+        </div>
+
+        <!-- Diagrama de secuencia -->
+        <div class="diagram-wrapper">
+          <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '12px', 'fontFamily': 'Inter'}}}%%
+sequenceDiagram
+    participant K as 📨 Kafka raw-flights
+    participant F as ⚡ Flink ProcessFunction
+    participant S as 💾 ValueState
+    participant A as 🚨 Kafka flight-alerts
+
+    K->>F: FlightState (icao24=3c6752, alt=11200)
+    F->>S: Guardar altitud + timestamp
+    K->>F: FlightState (icao24=3c6752, alt=9100)
+    F->>S: Comparar con historial
+    S-->>F: Δ altitud = -2100m en 20s
+    F->>A: ⚠️ ALERTA VERTICAL (severidad: alta)
+          </pre>
+        </div>
+
+        <!-- JSON de ejemplo -->
+        <div class="json-example">
+          <div class="json-title">📤 Ejemplo de alerta emitida al topic flight-alerts</div>
+<pre>{
+  <span class="json-key">"tipo_alerta"</span>: <span class="json-string">"vertical"</span>,
+  <span class="json-key">"icao24"</span>: <span class="json-string">"3c6752"</span>,
+  <span class="json-key">"callsign"</span>: <span class="json-string">"DLH1234"</span>,
+  <span class="json-key">"latitud"</span>: <span class="json-number">48.3456</span>,
+  <span class="json-key">"longitud"</span>: <span class="json-number">11.7890</span>,
+  <span class="json-key">"altitud_actual"</span>: <span class="json-number">9100</span>,
+  <span class="json-key">"altitud_previa"</span>: <span class="json-number">11200</span>,
+  <span class="json-key">"delta_altitud"</span>: <span class="json-number">-2100</span>,
+  <span class="json-key">"velocidad_vertical_ms"</span>: <span class="json-number">-105.0</span>,
+  <span class="json-key">"velocidad_kmh"</span>: <span class="json-number">852.3</span>,
+  <span class="json-key">"severidad"</span>: <span class="json-string">"alta"</span>,
+  <span class="json-key">"timestamp"</span>: <span class="json-string">"2026-03-24T18:30:12Z"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider">· · ·</div>
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- CASO 2: Alerta de Aeropuerto                    -->
+    <!-- ════════════════════════════════════════════════ -->
+    <div class="use-case-card">
+      <div class="card-accent accent-orange"></div>
+      <div class="card-header">
+        <div class="card-icon icon-orange">🏢</div>
+        <div>
+          <div class="case-id case-id-orange">UC-02</div>
+          <h2>Alerta de Aeropuerto — Concentración de Anomalías</h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>
+          Agrupa los eventos por <strong>aeropuerto de origen</strong> dentro de una <strong>ventana tumbling de 5 minutos</strong>.
+          Si en esa ventana se acumulan más de <strong>X aeronaves</strong> del mismo aeropuerto con comportamiento anómalo
+          (descensos bruscos, velocidades irregulares, etc.), se genera una alerta a nivel de aeropuerto.
+        </p>
+        <p>
+          <strong>Ejemplo real:</strong> 4 aviones procedentes de LEMD (Madrid-Barajas) registran descensos bruscos simultáneos
+          en la misma ventana de 5 minutos — posible meteorología adversa en la zona de aproximación o incidente en pista.
+        </p>
+
+        <div class="tech-tags">
+          <span class="tech-tag tag-flink">keyBy(airport)</span>
+          <span class="tech-tag tag-window">Tumbling Window 5min</span>
+          <span class="tech-tag tag-flink">AggregateFunction</span>
+          <span class="tech-tag tag-kafka">flight-alerts</span>
+        </div>
+
+        <div class="diagram-wrapper">
+          <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '12px', 'fontFamily': 'Inter'}}}%%
+sequenceDiagram
+    participant F1 as ✈️ Vuelo IBE301
+    participant F2 as ✈️ Vuelo RYR872
+    participant F3 as ✈️ Vuelo VLG44A
+    participant W as ⏱️ Ventana 5min (LEMD)
+    participant A as 🚨 flight-alerts
+
+    F1->>W: Anomalía vertical (LEMD)
+    F2->>W: Anomalía vertical (LEMD)
+    F3->>W: Anomalía vertical (LEMD)
+    Note over W: count(LEMD) = 3 > umbral(2)
+    W->>A: ⚠️ ALERTA AEROPUERTO (LEMD, 3 vuelos)
+          </pre>
+        </div>
+
+        <div class="json-example">
+          <div class="json-title">📤 Ejemplo de alerta emitida</div>
+<pre>{
+  <span class="json-key">"tipo_alerta"</span>: <span class="json-string">"aeropuerto"</span>,
+  <span class="json-key">"aeropuerto"</span>: <span class="json-string">"LEMD"</span>,
+  <span class="json-key">"nombre_aeropuerto"</span>: <span class="json-string">"Madrid-Barajas"</span>,
+  <span class="json-key">"num_vuelos_anomalos"</span>: <span class="json-number">3</span>,
+  <span class="json-key">"vuelos_afectados"</span>: [<span class="json-string">"IBE301"</span>, <span class="json-string">"RYR872"</span>, <span class="json-string">"VLG44A"</span>],
+  <span class="json-key">"ventana_inicio"</span>: <span class="json-string">"2026-03-24T18:25:00Z"</span>,
+  <span class="json-key">"ventana_fin"</span>: <span class="json-string">"2026-03-24T18:30:00Z"</span>,
+  <span class="json-key">"severidad"</span>: <span class="json-string">"media"</span>,
+  <span class="json-key">"timestamp"</span>: <span class="json-string">"2026-03-24T18:30:00Z"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider">· · ·</div>
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- CASO 3: Zona Muerta (H3)                        -->
+    <!-- ════════════════════════════════════════════════ -->
+    <div class="use-case-card">
+      <div class="card-accent accent-blue"></div>
+      <div class="card-header">
+        <div class="card-icon icon-blue">🗺️</div>
+        <div>
+          <div class="case-id case-id-blue">UC-03</div>
+          <h2>Alerta de Zona Muerta — Ausencia de Tráfico en Celda H3</h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>
+          Cada posición GPS se indexa en una <strong>celda hexagonal H3</strong> (resolución 4–5, ~22 km de diámetro).
+          Flink mantiene un registro histórico de qué celdas suelen tener tráfico.
+          Si una celda que habitualmente registra actividad aparece <strong>completamente vacía</strong> durante una
+          <strong>ventana tumbling de 5 minutos</strong>, se genera una alerta de zona muerta.
+        </p>
+        <p>
+          <strong>Ejemplo real:</strong> La celda H3 <code>841f91fffffffff</code> (corredor aéreo sobre los Pirineos)
+          normalmente registra 8–12 aeronaves cada 5 minutos. Durante la última ventana: 0 aeronaves. Posible restricción
+          temporal del espacio aéreo, cierre militar o fallo de radar.
+        </p>
+
+        <div class="tech-tags">
+          <span class="tech-tag tag-h3">Índice H3</span>
+          <span class="tech-tag tag-flink">keyBy(celdaH3)</span>
+          <span class="tech-tag tag-window">Tumbling Window 5min</span>
+          <span class="tech-tag tag-state">MapState</span>
+          <span class="tech-tag tag-kafka">flight-alerts</span>
+        </div>
+
+        <div class="diagram-wrapper">
+          <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '12px', 'fontFamily': 'Inter'}}}%%
+flowchart LR
+    subgraph HISTORICO["📊 Historial de Tráfico"]
+        H1["Celda 841f91\nMedia: 10 vuelos/5min"]
+    end
+
+    subgraph VENTANA["⏱️ Ventana Actual 5min"]
+        V1["Celda 841f91\n0 vuelos detectados"]
+    end
+
+    subgraph DECISION["🧠 Decisión"]
+        D1{"0 < umbral ?"}
+    end
+
+    subgraph SALIDA["🚨 Alerta"]
+        A1["ZONA MUERTA\n841f91fffffffff"]
+    end
+
+    H1 --> D1
+    V1 --> D1
+    D1 -->|Sí| A1
+
+    style H1 fill:#0d4a6b,stroke:#22d3ee,stroke-width:2px,color:#e0f2fe
+    style V1 fill:#4a2c17,stroke:#f97316,stroke-width:2px,color:#ffedd5
+    style D1 fill:#3b1323,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6
+    style A1 fill:#14392a,stroke:#34d399,stroke-width:2px,color:#d1fae5
+    style HISTORICO fill:#0c1a2e,stroke:#22d3ee,stroke-width:1px,color:#22d3ee
+    style VENTANA fill:#1a1005,stroke:#f97316,stroke-width:1px,color:#f97316
+    style DECISION fill:#1a0a0a,stroke:#f43f5e,stroke-width:1px,color:#f43f5e
+    style SALIDA fill:#0a1a14,stroke:#34d399,stroke-width:1px,color:#34d399
+          </pre>
+        </div>
+
+        <div class="json-example">
+          <div class="json-title">📤 Ejemplo de alerta emitida</div>
+<pre>{
+  <span class="json-key">"tipo_alerta"</span>: <span class="json-string">"zona_muerta"</span>,
+  <span class="json-key">"celda_h3"</span>: <span class="json-string">"841f91fffffffff"</span>,
+  <span class="json-key">"centro_lat"</span>: <span class="json-number">42.7812</span>,
+  <span class="json-key">"centro_lon"</span>: <span class="json-number">0.5634</span>,
+  <span class="json-key">"media_historica"</span>: <span class="json-number">10</span>,
+  <span class="json-key">"vuelos_ventana_actual"</span>: <span class="json-number">0</span>,
+  <span class="json-key">"ventana_inicio"</span>: <span class="json-string">"2026-03-24T18:25:00Z"</span>,
+  <span class="json-key">"ventana_fin"</span>: <span class="json-string">"2026-03-24T18:30:00Z"</span>,
+  <span class="json-key">"severidad"</span>: <span class="json-string">"alta"</span>,
+  <span class="json-key">"timestamp"</span>: <span class="json-string">"2026-03-24T18:30:00Z"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider">· · ·</div>
+
+    <!-- ════════════════════════════════════════════════ -->
+    <!-- CASO 4: Flink CEP — Patrones Complejos          -->
+    <!-- ════════════════════════════════════════════════ -->
+    <div class="use-case-card">
+      <div class="card-accent accent-purple"></div>
+      <div class="card-header">
+        <div class="card-icon icon-purple">🧩</div>
+        <div>
+          <div class="case-id case-id-purple">UC-04</div>
+          <h2>Flink CEP — Detección de Patrones Complejos Encadenados</h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>
+          Utiliza la API de <strong>Flink CEP (Complex Event Processing)</strong> para definir patrones encadenados
+          que sería imposible detectar con una sola ventana. La librería permite definir secuencias de condiciones
+          con restricciones temporales (ej. <em>"evento A seguido de evento B en menos de 2 minutos"</em>).
+        </p>
+        <p>
+          <strong>Ejemplo real:</strong> Un avión ejecuta un <strong>descenso brusco</strong> (−2000m) seguido inmediatamente de
+          <strong>velocidad horizontal = 0</strong> durante más de 60 segundos → posible aterrizaje de emergencia o accidente.
+          Este patrón combina datos de los nodos UC-01 y UC-02 encadenados temporalmente.
+        </p>
+
+        <div class="tech-tags">
+          <span class="tech-tag tag-cep">Flink CEP</span>
+          <span class="tech-tag tag-flink">Pattern API</span>
+          <span class="tech-tag tag-window">within(2 min)</span>
+          <span class="tech-tag tag-kafka">flight-alerts</span>
+        </div>
+
+        <div class="diagram-wrapper">
+          <pre class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '12px', 'fontFamily': 'Inter'}}}%%
+stateDiagram-v2
+    direction LR
+
+    [*] --> Monitorizando
+    Monitorizando --> DescensoBrusco: Δ alt > 2000m
+    DescensoBrusco --> VelocidadCero: vel_horizontal = 0 (< 2min)
+    VelocidadCero --> AlertaCritica: duración > 60s
+    AlertaCritica --> [*]: Emitir alerta CEP
+
+    DescensoBrusco --> Monitorizando: timeout 2min
+    VelocidadCero --> Monitorizando: vel > 0 (recupera)
+          </pre>
+        </div>
+
+        <div class="json-example">
+          <div class="json-title">📤 Ejemplo de alerta emitida</div>
+<pre>{
+  <span class="json-key">"tipo_alerta"</span>: <span class="json-string">"cep_aterrizaje_emergencia"</span>,
+  <span class="json-key">"icao24"</span>: <span class="json-string">"4b1806"</span>,
+  <span class="json-key">"callsign"</span>: <span class="json-string">"SWR285"</span>,
+  <span class="json-key">"patron"</span>: <span class="json-string">"descenso_brusco → velocidad_cero"</span>,
+  <span class="json-key">"latitud"</span>: <span class="json-number">47.4502</span>,
+  <span class="json-key">"longitud"</span>: <span class="json-number">8.5618</span>,
+  <span class="json-key">"altitud_inicio_patron"</span>: <span class="json-number">8200</span>,
+  <span class="json-key">"altitud_final"</span>: <span class="json-number">430</span>,
+  <span class="json-key">"duracion_vel_cero_seg"</span>: <span class="json-number">78</span>,
+  <span class="json-key">"severidad"</span>: <span class="json-string">"critica"</span>,
+  <span class="json-key">"timestamp"</span>: <span class="json-string">"2026-03-24T18:31:44Z"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cases-grid -->
+
+  <!-- ====== FOOTER ====== -->
+  <div class="page-footer">
+    Sistema de Detección de Anomalías de Vuelo — Apache Flink · Kafka · FastAPI · 2026
+  </div>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      securityLevel: 'loose',
+      flowchart: {
+        curve: 'basis',
+        padding: 16,
+        nodeSpacing: 50,
+        rankSpacing: 60,
+        useMaxWidth: true
+      },
+      sequence: {
+        useMaxWidth: true,
+        actorMargin: 40,
+        messageFontSize: 12
+      }
+    });
+  </script>
+
+</body>
+</html>
