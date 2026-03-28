@@ -302,30 +302,33 @@ sequenceDiagram
     <div class="section-divider">· · ·</div>
 
     <!-- ════════════════════════════════════════════════ -->
-    <!-- CASO 2: Alerta de Aeropuerto                    -->
+    <!-- CASO 2: Alta Densidad (H3)                      -->
     <!-- ════════════════════════════════════════════════ -->
     <div class="use-case-card">
       <div class="card-accent accent-orange"></div>
       <div class="card-header">
-        <div class="card-icon icon-orange">🏢</div>
+        <div class="card-icon icon-orange">📡</div>
         <div>
           <div class="case-id case-id-orange">UC-02</div>
-          <h2>Alerta de Aeropuerto — Concentración de Anomalías</h2>
+          <h2>Alta Densidad — Concentración de Tráfico en Celda H3</h2>
         </div>
       </div>
       <div class="card-body">
         <p>
-          Agrupa los eventos por <strong>aeropuerto de origen</strong> dentro de una <strong>ventana tumbling de 5 minutos</strong>.
-          Si en esa ventana se acumulan más de <strong>X aeronaves</strong> del mismo aeropuerto con comportamiento anómalo
-          (descensos bruscos, velocidades irregulares, etc.), se genera una alerta a nivel de aeropuerto.
+          Cada posición GPS se indexa en una <strong>celda hexagonal H3</strong> (resolución 4–5).
+          Flink cuenta el número de aeronaves dentro de cada celda en una <strong>ventana tumbling de 5 minutos</strong>.
+          Si en esa ventana se acumulan más de <strong>X aeronaves</strong> en la misma celda H3,
+          se genera una alerta de alta densidad que indica una concentración inusual de tráfico aéreo.
         </p>
         <p>
-          <strong>Ejemplo real:</strong> 4 aviones procedentes de LEMD (Madrid-Barajas) registran descensos bruscos simultáneos
-          en la misma ventana de 5 minutos — posible meteorología adversa en la zona de aproximación o incidente en pista.
+          <strong>Ejemplo real:</strong> La celda H3 <code>86395b467ffffff</code> (zona centro de Madrid)
+          registra 85 aeronaves en una ventana de 5 minutos — posible congestión, evento especial
+          o condiciones meteorológicas que obligan a concentrar rutas.
         </p>
 
         <div class="tech-tags">
-          <span class="tech-tag tag-flink">keyBy(airport)</span>
+          <span class="tech-tag tag-h3">Índice H3</span>
+          <span class="tech-tag tag-flink">keyBy(celdaH3)</span>
           <span class="tech-tag tag-window">Tumbling Window 5min</span>
           <span class="tech-tag tag-flink">AggregateFunction</span>
           <span class="tech-tag tag-kafka">flight-alerts</span>
@@ -335,32 +338,36 @@ sequenceDiagram
           <pre class="mermaid">
 %%{init: {'theme': 'dark', 'themeVariables': {'fontSize': '12px', 'fontFamily': 'Inter'}}}%%
 sequenceDiagram
-    participant F1 as ✈️ Vuelo IBE301
-    participant F2 as ✈️ Vuelo RYR872
-    participant F3 as ✈️ Vuelo VLG44A
-    participant W as ⏱️ Ventana 5min (LEMD)
+    participant K as 📨 Kafka raw-flights
+    participant F as ⚡ Flink keyBy(celdaH3)
+    participant W as ⏱️ Ventana 5min
     participant A as 🚨 flight-alerts
 
-    F1->>W: Anomalía vertical (LEMD)
-    F2->>W: Anomalía vertical (LEMD)
-    F3->>W: Anomalía vertical (LEMD)
-    Note over W: count(LEMD) = 3 > umbral(2)
-    W->>A: ⚠️ ALERTA AEROPUERTO (LEMD, 3 vuelos)
+    K->>F: FlightState (lat/lon → H3: 86395b467fff)
+    K->>F: FlightState (lat/lon → H3: 86395b467fff)
+    K->>F: FlightState (lat/lon → H3: 86395b467fff)
+    F->>W: Acumular vuelos en celda
+    Note over W: count(celda) = 85 > umbral
+    W->>A: ⚠️ ALERTA ALTA DENSIDAD (celda, 85 vuelos)
           </pre>
         </div>
 
         <div class="json-example">
           <div class="json-title">📤 Ejemplo de alerta emitida</div>
 <pre>{
-  <span class="json-key">"tipo_alerta"</span>: <span class="json-string">"aeropuerto"</span>,
-  <span class="json-key">"aeropuerto"</span>: <span class="json-string">"LEMD"</span>,
-  <span class="json-key">"nombre_aeropuerto"</span>: <span class="json-string">"Madrid-Barajas"</span>,
-  <span class="json-key">"num_vuelos_anomalos"</span>: <span class="json-number">3</span>,
+  <span class="json-key">"tipo_alerta"</span>: <span class="json-string">"alta_densidad"</span>,
+  <span class="json-key">"estado"</span>: <span class="json-string">"actualizacion"</span>,
+  <span class="json-key">"severidad"</span>: <span class="json-string">"media"</span>,
+  <span class="json-key">"timestamp"</span>: <span class="json-string">"2026-03-24T18:30:00Z"</span>,
+  <span class="json-key">"latitud"</span>: <span class="json-number">40.4719</span>,
+  <span class="json-key">"longitud"</span>: <span class="json-number">-3.5626</span>,
+  <span class="json-key">"origen_pais"</span>: <span class="json-bool">null</span>,
+  <span class="json-key">"en_tierra"</span>: <span class="json-bool">null</span>,
+  <span class="json-key">"celda_h3"</span>: <span class="json-string">"86395b467ffffff"</span>,
+  <span class="json-key">"num_vuelos_actual"</span>: <span class="json-number">85</span>,
   <span class="json-key">"vuelos_afectados"</span>: [<span class="json-string">"IBE301"</span>, <span class="json-string">"RYR872"</span>, <span class="json-string">"VLG44A"</span>],
   <span class="json-key">"ventana_inicio"</span>: <span class="json-string">"2026-03-24T18:25:00Z"</span>,
-  <span class="json-key">"ventana_fin"</span>: <span class="json-string">"2026-03-24T18:30:00Z"</span>,
-  <span class="json-key">"severidad"</span>: <span class="json-string">"media"</span>,
-  <span class="json-key">"timestamp"</span>: <span class="json-string">"2026-03-24T18:30:00Z"</span>
+  <span class="json-key">"ventana_fin"</span>: <span class="json-string">"2026-03-24T18:30:00Z"</span>
 }</pre>
         </div>
       </div>
