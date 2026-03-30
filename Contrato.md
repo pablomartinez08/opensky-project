@@ -16,5 +16,8 @@ El sistema correlacionará las alertas individuales con el aeropuerto de origen 
 c) Zonas geográficas sin tráfico
 Mediante la indexación del espacio aéreo con celdas hexagonales H3, el sistema identificará regiones geográficas que, teniendo históricamente tráfico aéreo regular, experimenten una ausencia prolongada de aeronaves. Este patrón puede ser indicativo de restricciones de espacio aéreo no previstas, condiciones meteorológicas extremas o incidentes de seguridad en dicha zona.
 
+d) Detección de patrones de emergencia
+Mediante la API de Flink CEP, el sistema integra las señales de variaciones verticales, anomalías en aeropuertos y zonas sin tráfico para identificar situaciones de crisis multidimensionales. El motor detecta secuencias críticas —como descensos bruscos seguidos de inmovilidad prolongada en tierra o pérdidas de señal en celdas H3 tras maniobras erráticas— permitiendo distinguir entre incidentes aislados y emergencias sistémicas. Esta capa de procesamiento gestiona el ciclo de vida de la alerta, manteniendo el estado activo hasta que la telemetría confirme la estabilización de la aeronave o la resolución del evento.
+
 # 1.3 Objetivo general del proyecto
 En resumen, el proyecto persigue construir un sistema funcional de análisis de tráfico aéreo en tiempo real que permita, de forma automatizada y sin intervención humana directa, identificar situaciones potencialmente anómalas en el espacio aéreo global. El resultado final será una herramienta de observabilidad que pueda ser utilizada tanto en contextos académicos como como base de una futura solución profesional orientada a organismos de control de tráfico aéreo, aerolíneas o autoridades de seguridad aérea.
