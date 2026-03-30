@@ -2,12 +2,16 @@ import json
 import time
 import requests
 from kafka import KafkaProducer
-
 # OpenSky API URL
 OPENSKY_URL = "https://opensky-network.org/api/states/all"
 KAFKA_TOPIC = "flight_data"
+<<<<<<< Updated upstream
 
 KAFKA_SERVER = "localhost:19092"
+=======
+# Apuntamos al puerto de Kafka externo al docker (KRaft listener)
+KAFKA_SERVER = "localhost:9094"
+>>>>>>> Stashed changes
 
 def main():
     print(f"Conectando a Kafka en {KAFKA_SERVER}...")
@@ -16,7 +20,6 @@ def main():
         value_serializer=lambda v: json.dumps(v).encode('utf-8')
     )
     print("¡Conectado! Obteniendo datos de OpenSky...")
-
     while True:
         try:
             # Reducimos los datos usando un bounding box (Europa aprox) para evitar sobrecargar Flink en la demo
@@ -58,6 +61,5 @@ def main():
         # La API pública de OpenSky tiene un rate limit estricto (1 request cada 10s para anónimos)
         print("Esperando 10 segundos para la siguiente petición...")
         time.sleep(10)
-
 if __name__ == "__main__":
     main()

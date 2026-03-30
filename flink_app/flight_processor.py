@@ -4,7 +4,6 @@ from pyflink.datastream.connectors.kafka import FlinkKafkaConsumer
 from pyflink.common.serialization import SimpleStringSchema
 from pyflink.common.typeinfo import Types
 from pyflink.datastream.functions import MapFunction, FilterFunction
-
 class ParseJsonFunction(MapFunction):
     """Parsea el String de Kafka a un Diccionario en Python"""
     def map(self, value):
@@ -12,7 +11,6 @@ class ParseJsonFunction(MapFunction):
             return json.loads(value)
         except Exception:
             return None
-
 class HighAltitudeFilter(FilterFunction):
     """Filtra los vuelos que estén por encima de 10.000 metros"""
     def filter(self, value):
@@ -20,7 +18,6 @@ class HighAltitudeFilter(FilterFunction):
             return False
         alt = value.get("altitude")
         return alt is not None and alt > 10000
-
 class FlightFormatter(MapFunction):
     """Formatea la salida para imprimirla de manera legible"""
     def map(self, flight):
@@ -33,7 +30,6 @@ class FlightFormatter(MapFunction):
         vel_kmh = velocity * 3.6 if velocity else 0
         
         return f"✈️ [ALTA ALTITUD] Vuelo {callsign} ({country}) detectado a {altitude}m de altura. Velocidad: {vel_kmh:.1f} km/h"
-
 def main():
     # 1. Configurar Entorno de Flink
     env = StreamExecutionEnvironment.get_execution_environment()
@@ -43,7 +39,11 @@ def main():
     
     # 2. Configurar la fuente de datos (Kafka Consumer)
     properties = {
+<<<<<<< Updated upstream
         'bootstrap.servers': 'redpanda:9092', 
+=======
+        'bootstrap.servers': 'kafka:9092', # Usamos el host interno de kafka de la red de docker
+>>>>>>> Stashed changes
         'group.id': 'flink-flight-consumer',
         'auto.offset.reset': 'latest'
     }
@@ -56,7 +56,6 @@ def main():
     )
     
     print("Iniciando aplicación Flink de análisis de vuelos de OpenSky...")
-
     # 3. Flujo principal del programa
     stream = env.add_source(kafka_consumer)
     
@@ -68,9 +67,7 @@ def main():
     
     # 4. Sumidero (Sink) de los datos: Imprimir en pantalla
     output_stream.print()
-
     # 5. Ejecutar la topología en el clúster (JobManager)
     env.execute("OpenSky Real-Time Flight Tracker")
-
 if __name__ == '__main__':
     main()
