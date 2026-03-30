@@ -6,7 +6,7 @@ from kafka import KafkaProducer
 # OpenSky API URL
 OPENSKY_URL = "https://opensky-network.org/api/states/all"
 KAFKA_TOPIC = "flight_data"
-# Apuntamos al puerto de Redpanda expuesto al host (localhost) y WSL
+
 KAFKA_SERVER = "localhost:19092"
 
 def main():
