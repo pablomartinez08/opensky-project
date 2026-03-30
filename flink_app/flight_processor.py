@@ -43,7 +43,7 @@ def main():
     
     # 2. Configurar la fuente de datos (Kafka Consumer)
     properties = {
-        'bootstrap.servers': 'redpanda:9092', # Usamos el host interno de redpanda que ven otros contenedores Docker
+        'bootstrap.servers': 'redpanda:9092', 
         'group.id': 'flink-flight-consumer',
         'auto.offset.reset': 'latest'
     }
