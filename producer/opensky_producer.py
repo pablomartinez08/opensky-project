@@ -5,13 +5,8 @@ from kafka import KafkaProducer
 # OpenSky API URL
 OPENSKY_URL = "https://opensky-network.org/api/states/all"
 KAFKA_TOPIC = "flight_data"
-<<<<<<< Updated upstream
-
-KAFKA_SERVER = "localhost:19092"
-=======
 # Apuntamos al puerto de Kafka externo al docker (KRaft listener)
 KAFKA_SERVER = "localhost:9094"
->>>>>>> Stashed changes
 
 def main():
     print(f"Conectando a Kafka en {KAFKA_SERVER}...")
