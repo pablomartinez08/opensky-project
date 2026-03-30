@@ -218,7 +218,7 @@
 
     /* Tipos de alerta */
     .alert-card.type-vertical::before { background: var(--accent-red); }
-    .alert-card.type-density::before { background: var(--accent-orange); }
+    .alert-card.type-airport::before { background: var(--accent-orange); }
     .alert-card.type-deadzone::before { background: var(--accent-blue); }
     .alert-card.type-cep::before { background: var(--accent-purple); }
 
@@ -237,7 +237,7 @@
       border-radius: 4px;
     }
     .badge-vertical { background: rgba(244,63,94,0.15); color: var(--accent-red); }
-    .badge-density { background: rgba(249,115,22,0.15); color: var(--accent-orange); }
+    .badge-airport { background: rgba(249,115,22,0.15); color: var(--accent-orange); }
     .badge-deadzone { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
     .badge-cep { background: rgba(168,85,247,0.15); color: var(--accent-purple); }
 
@@ -435,7 +435,7 @@
       background: rgba(244,63,94,0.25);
       border-color: var(--accent-red);
     }
-    .marker-density {
+    .marker-airport {
       background: rgba(249,115,22,0.25);
       border-color: var(--accent-orange);
     }
@@ -543,17 +543,17 @@
           <div class="alert-timestamp">hace 45s · icao24: 495294</div>
         </div>
 
-        <!-- Card 3 - Alta Densidad -->
-        <div class="alert-card type-density" onclick="selectAlert(this)">
+        <!-- Card 3 - Airport -->
+        <div class="alert-card type-airport" onclick="selectAlert(this)">
           <div class="alert-card-header">
-            <span class="alert-type-badge badge-density">📡 Alta Densidad</span>
-            <span class="alert-severity severity-media">● Media</span>
+            <span class="alert-type-badge badge-airport">🏢 Densidad</span>
+            <span class="alert-severity severity-alta">● Alta</span>
           </div>
           <div class="alert-callsign">Celda 86395b46</div>
           <div class="alert-details">
-            <strong>85 vuelos</strong> en celda H3 · ventana 5min<br>
-            IBE301, RYR872, VLG44A…<br>
-            📍 40.47° N, −3.56° W
+            <strong>85 vuelos</strong> en ventana 5min<br>
+            IBE301, RYR872, VLG44A...<br>
+            Concentración inusual detectada
           </div>
           <div class="alert-timestamp">hace 1m 20s · ventana: 18:25–18:30</div>
         </div>
@@ -566,8 +566,8 @@
           </div>
           <div class="alert-callsign">Celda 841f91ff</div>
           <div class="alert-details">
-            Corredor Pirineos — <strong>0 vuelos</strong><br>
-            Media histórica: <strong>10 vuelos/5min</strong><br>
+            Caída abrupta de tráfico — <strong>0 vuelos</strong><br>
+            Ventana anterior: <strong>12 vuelos/5min</strong><br>
             📍 42.78° N, 0.56° E
           </div>
           <div class="alert-timestamp">hace 2m 05s · ventana: 18:25–18:30</div>
@@ -588,17 +588,16 @@
           <div class="alert-timestamp">hace 3m 12s · icao24: 3c6752</div>
         </div>
 
-        <!-- Card 6 - Alta Densidad -->
-        <div class="alert-card type-density" onclick="selectAlert(this)">
+        <!-- Card 6 - Airport -->
+        <div class="alert-card type-airport" onclick="selectAlert(this)">
           <div class="alert-card-header">
-            <span class="alert-type-badge badge-density">📡 Alta Densidad</span>
+            <span class="alert-type-badge badge-airport">🏢 Densidad</span>
             <span class="alert-severity severity-media">● Media</span>
           </div>
-          <div class="alert-callsign">Celda 8639a1b2</div>
+          <div class="alert-callsign">Celda 86423c11</div>
           <div class="alert-details">
-            <strong>62 vuelos</strong> en celda H3 · ventana 5min<br>
-            AFR221, EZY43T, BAW73J…<br>
-            📍 49.01° N, 2.55° E
+            <strong>45 vuelos</strong> en ventana 5min<br>
+            AFR221, EZY43T, BAW73J...
           </div>
           <div class="alert-timestamp">hace 4m 50s · ventana: 18:20–18:25</div>
         </div>
@@ -626,8 +625,8 @@
           </div>
           <div class="alert-callsign">Celda 841e8bff</div>
           <div class="alert-details">
-            Mar del Norte — <strong>1 vuelo</strong><br>
-            Media histórica: <strong>7 vuelos/5min</strong><br>
+            Corredor Norte — <strong>0 vuelos</strong><br>
+            Ventana anterior: <strong>7 vuelos/5min</strong><br>
             📍 55.10° N, 3.20° E
           </div>
           <div class="alert-timestamp">hace 6m 44s · ventana: 18:20–18:25</div>
@@ -690,7 +689,7 @@
         </div>
         <div class="map-legend-item">
           <div class="map-legend-dot" style="background: var(--accent-orange);"></div>
-          Alta Densidad H3
+          Alta Densidad de Vuelos
         </div>
         <div class="map-legend-item">
           <div class="map-legend-dot" style="background: var(--accent-blue);"></div>
@@ -745,18 +744,18 @@
         popup: '<strong style="color:#f43f5e;">⚠️ SWR285</strong><br>Descenso −2.100m<br>Alt: 9.100m · 852 km/h' },
       { lat: 38.77, lon: -9.13, emoji: '✈️', css: 'marker-cep',
         popup: '<strong style="color:#a855f7;">🧩 TAP912</strong><br>Aterrizaje emergencia<br>Vel: 0 km/h · 78s' },
-      { lat: 40.47, lon: -3.56, emoji: '⬡', css: 'marker-density',
-        popup: '<strong style="color:#f97316;">📡 Alta Densidad</strong><br>85 vuelos en celda H3<br>Ventana 18:25–18:30' },
+      { lat: 40.47, lon: -3.56, emoji: '🏢', css: 'marker-airport',
+        popup: '<strong style="color:#f97316;">🏢 Densidad H3</strong><br>85 vuelos zona<br>Ventana 18:25–18:30' },
       { lat: 42.78, lon: 0.56, emoji: '⬡', css: 'marker-deadzone',
-        popup: '<strong style="color:#3b82f6;">🗺️ Zona Muerta</strong><br>Celda 841f91ff<br>0 vuelos (media: 10)' },
+        popup: '<strong style="color:#3b82f6;">🗺️ Zona Muerta</strong><br>Celda 841f91ff<br>0 vuelos (previo: 12)' },
       { lat: 50.11, lon: 8.68, emoji: '✈️', css: 'marker-vertical',
         popup: '<strong style="color:#f43f5e;">⚠️ DLH1234</strong><br>Ascenso +1.800m<br>Alt: 12.400m · 910 km/h' },
-      { lat: 49.01, lon: 2.55, emoji: '⬡', css: 'marker-density',
-        popup: '<strong style="color:#f97316;">📡 Alta Densidad</strong><br>62 vuelos en celda H3<br>Ventana 18:20–18:25' },
+      { lat: 49.01, lon: 2.55, emoji: '🏢', css: 'marker-airport',
+        popup: '<strong style="color:#f97316;">🏢 Densidad H3</strong><br>45 vuelos zona<br>Ventana 18:20–18:25' },
       { lat: 41.39, lon: 2.15, emoji: '✈️', css: 'marker-vertical',
         popup: '<strong style="color:#f43f5e;">⚠️ RYR4412</strong><br>Descenso −1.950m<br>Alt: 7.200m · 780 km/h' },
       { lat: 55.10, lon: 3.20, emoji: '⬡', css: 'marker-deadzone',
-        popup: '<strong style="color:#3b82f6;">🗺️ Zona Muerta</strong><br>Celda 841e8bff<br>1 vuelo (media: 7)' },
+        popup: '<strong style="color:#3b82f6;">🗺️ Zona Muerta</strong><br>Celda 841e8bff<br>0 vuelos (previo: 7)' },
     ];
 
     alerts.forEach(a => {
@@ -784,9 +783,9 @@
     drawHexZone(42.78, 0.56, '#3b82f6');
     drawHexZone(55.10, 3.20, '#3b82f6');
 
-    // ——— Alta densidad: hexágono simbólico H3 ———
-    drawHexZone(40.47, -3.56, '#f97316');
-    drawHexZone(49.01, 2.55, '#f97316');
+    // ——— Círculo de concentración aeropuerto ———
+    L.circle([40.47, -3.56], { radius: 60000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.06, weight: 1.5, dashArray: '8, 4' }).addTo(map);
+    L.circle([49.01, 2.55], { radius: 50000, color: '#f97316', fillColor: '#f97316', fillOpacity: 0.06, weight: 1.5, dashArray: '8, 4' }).addTo(map);
 
     // ——— Select alert card ———
     function selectAlert(el) {
