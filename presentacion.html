@@ -1,197 +1,334 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <title>Sistema de Detección de Anomalías Aéreas</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Reveal.js Themes -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/night.min.css" id="theme">
-    <style>
-        /* Estilos personalizados para encajar con el branding del Dashboard */
-        .reveal h1, .reveal h2, .reveal h3 { color: #58a6ff; text-transform: uppercase; letter-spacing: 2px; }
-        .reveal h1 { font-size: 1.8em; font-weight: 800; }
-        .reveal h2 { font-size: 1.4em; font-weight: 700; margin-bottom: 30px; }
-        .reveal p, .reveal li { font-size: 0.85em; color: #c9d1d9; line-height: 1.6; }
-        .reveal .accent { color: #f43f5e; font-weight: bold; }
-        
-        /* Cajas de texto */
-        .box { background: rgba(22, 27, 34, 0.8); border: 1px solid #30363d; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: left; }
-        
-        /* Layout flex de 3 o 2 columnas */
-        .flex-container { display: flex; justify-content: space-around; gap: 20px; margin-top: 30px;}
-        .flex-col { flex: 1; text-align: left; background: rgba(22, 27, 34, 0.6); padding: 25px; border-radius: 10px; border: 1px solid #30363d; }
-        .flex-col h3 { font-size: 1em; color: #22d3ee; margin-bottom: 15px;}
-        
-        /* Cajas narrativas ("Qué decir") ocultas para el publico, solo para ti si repasas, o con diseño tenue */
-        .narrative { font-style: italic; font-size: 0.65em !important; color: #8b949e !important; background: rgba(0,0,0,0.3); padding: 20px; border-left: 4px solid #58a6ff; margin-top: 40px; text-align: left;}
-        
-        .icon-large { font-size: 2.2em; margin-bottom: 10px; }
-        .timeline-step { display: flex; align-items: center; justify-content:flex-start; margin-bottom: 15px; font-size: 0.8em; }
-        
-        .reveal-viewport { background: #0d1117; } /* Fondo GitHub dark */
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Presentación del Proyecto Flink</title>
+  
+  <!-- Estilos base de Reveal.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.css">
+  
+  <!-- Tema personalizado -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg-color: #0d1117;
+      --main-color: #e6edf3;
+      --accent-cyan: #22d3ee;
+      --accent-purple: #a855f7;
+      --accent-green: #34d399;
+      --accent-red: #f43f5e;
+      --accent-orange: #f97316;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 50%, #161b22 0%, #0d1117 100%);
+    }
+
+    .reveal {
+      font-family: 'Inter', sans-serif;
+      color: var(--main-color);
+    }
+
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      text-transform: none;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+
+    .reveal h1 { font-size: 3.5em; text-shadow: 0 0 40px rgba(34,211,238,0.3); }
+    .reveal h2 { font-size: 2.5em; text-shadow: 0 0 30px rgba(168,85,247,0.3); }
+
+    .text-gradient {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .text-gradient-orange {
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .reveal p {
+      font-size: 1.2em;
+      font-weight: 300;
+      line-height: 1.5;
+      color: #8b949e;
+    }
+
+    .reveal ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .reveal li {
+      margin-bottom: 15px;
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      color: #c9d1d9;
+    }
+
+    .reveal li::before {
+      content: '⚡';
+      margin-right: 15px;
+      font-size: 0.9em;
+      filter: drop-shadow(0 0 5px var(--accent-cyan));
+    }
+
+    .box-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .glass-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      text-align: left;
+    }
+
+    .glass-box:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      border-color: var(--accent-cyan);
+    }
+
+    .glass-box h3 {
+      font-size: 1.5em;
+      margin-top: 0;
+      color: var(--main-color);
+    }
+
+    .glass-box p {
+      font-size: 1em;
+      margin-bottom: 0;
+    }
+
+    .icon-large {
+      font-size: 2.5em;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.6em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-left: 15px;
+      vertical-align: middle;
+    }
+
+    .status-done { background: rgba(52,211,153,0.15); color: var(--accent-green); border: 1px solid rgba(52,211,153,0.4); }
+    .status-progress { background: rgba(34,211,238,0.15); color: var(--accent-cyan); border: 1px solid rgba(34,211,238,0.4); }
+    .status-todo { background: rgba(139,148,158,0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.4); }
+
+    .glow-img {
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(34,211,238,0.2);
+      border: 1px solid rgba(255,255,255,0.1);
+      max-height: 50vh !important;
+    }
+  </style>
 </head>
 <body>
-    <div class="reveal">
-        <div class="slides">
-            
-            <!-- 1. Portada -->
-            <section data-transition="zoom">
-                <h1>Detección de Anomalías Aéreas</h1>
-                <h3 style="color: #c9d1d9; font-weight: 400; font-size: 1em; margin-top: 20px;">Observabilidad y Seguridad en Tiempo Real</h3>
-                <p style="margin-top: 60px; font-size: 0.7em; color: #8b949e;">Apache Flink · Kafka KRaft · FastAPI · OpenSky Network</p>
-                <div class="narrative">
-                    <strong>Tú dices:</strong> "Bienvenidos. Hoy vamos a presentar nuestro sistema de detección de anomalías aéreas en tiempo real. El núcleo de este proyecto es utilizar tecnologías de vanguardia para mejorar la seguridad y la observabilidad del espacio aéreo global."
-                </div>
-            </section>
 
-            <!-- 2. ¿Qué es Apache Flink? -->
-            <section data-transition="zoom">
-                <h2>¿Qué es Apache Flink?</h2>
-                <div class="flex-container">
-                    <div class="flex-col">
-                        <div class="icon-large">⚡</div>
-                        <h3>Streaming Real-Time</h3>
-                        <p>No espera a que los datos se acumulen; los procesa en milisegundos según llegan al sistema.</p>
-                    </div>
-                    <div class="flex-col">
-                        <div class="icon-large">🧠</div>
-                        <h3>Stateful (Estado)</h3>
-                        <p>Es capaz de "recordar" la trayectoria previa de un avión para compararla con su estado actual.</p>
-                    </div>
-                    <div class="flex-col">
-                        <div class="icon-large">📈</div>
-                        <h3>Escalabilidad</h3>
-                        <p>Diseñado para manejar flujos masivos de datos a nivel mundial sin despeinarse.</p>
-                    </div>
-                </div>
-                <div class="narrative">
-                    <strong>Tú dices:</strong> "Elegimos Apache Flink porque, a diferencia de otros motores de datos, nos permite reaccionar al instante. No analizamos logs del pasado, analizamos eventos que están ocurriendo ahora mismo."
-                </div>
-            </section>
+  <div class="reveal">
+    <div class="slides">
+      
+      <!-- Portada -->
+      <section data-auto-animate>
+        <span class="icon-large" style="font-size: 4em; filter: drop-shadow(0 0 20px #22d3ee);">✈️</span>
+        <h1>Sistema de Detección de <br> <span class="text-gradient">Anomalías Aéreas</span></h1>
+        <p>Procesamiento en tiempo real con Apache Flink</p>
+      </section>
 
-            <!-- 3. ¿De qué va nuestro Proyecto? -->
-            <section data-transition="zoom">
-                <h2>El Concepto del Proyecto</h2>
-                <div class="box">
-                    <p style="margin: 0;">🧭 El control aéreo tradicional es excelente gestionando rutas individuales, pero <strong>falla al detectar patrones globales</strong> de forma automática y predictiva.</p>
-                </div>
-                <div class="box">
-                    <p style="margin: 0;">📡 Nosotros ingerimos datos públicos de <strong>OpenSky Network (señales ADS-B)</strong> para crear una capa geométrica automática que detecte riesgos sin que un humano tenga que estar mirando cada punto en el mapa.</p>
-                </div>
-            </section>
+      <!-- ¿Qué es Apache Flink? -->
+      <section data-auto-animate>
+        <h2>¿Qué es <span class="text-gradient-orange">Apache Flink</span>?</h2>
+        <p style="text-align: left; max-width: 800px; margin: 0 auto; margin-bottom: 30px;">
+          Apache Flink es un motor y framework de procesamiento distribuido para cálculos con estado sobre flujos de datos ilimitados (streams) y limitados (batches).
+        </p>
+        <div class="box-container" style="grid-template-columns: 1fr 1fr;">
+          <div class="glass-box">
+            <h3>⚡ Streaming Real-Time</h3>
+            <p>Procesa eventos en el momento exacto en que ocurren con latencias de submilisegundos.</p>
+          </div>
+          <div class="glass-box" style="border-color: rgba(168,85,247,0.3);">
+            <h3>🧠 Stateful Processing</h3>
+            <p>Mantiene el "estado" de las operaciones (ej. historial reciente del vuelo) con alta tolerancia a fallos.</p>
+          </div>
+          <div class="glass-box" style="border-color: rgba(52,211,153,0.3);">
+            <h3>🔍 Event Time Semantics</h3>
+            <p>Entiende cuándo ocurrió el evento realmente, gestionando retrasos en la red impecablemente.</p>
+          </div>
+          <div class="glass-box" style="border-color: rgba(249,115,22,0.3);">
+            <h3>📈 Escalabilidad</h3>
+            <p>Diseñado para escalar masivamente, procesando millones de eventos por segundo en clusters.</p>
+          </div>
+        </div>
+      </section>
 
-            <!-- 4. ¿Qué anomalías detectamos? -->
-            <section data-transition="zoom">
-                <h2>¿Qué anomalías detectamos?</h2>
-                <div class="flex-container">
-                    <div class="flex-col" style="border-top: 4px solid #f43f5e">
-                        <h3 style="color:#f43f5e">📉 Altitud Brusca</h3>
-                        <p style="font-size: 0.8em; font-style: italic;">"Si un avión cae 5000 pies en 30 segundos, es una emergencia. Flink lo detecta y lanza la alerta inmediatamente."</p>
-                    </div>
-                    <div class="flex-col" style="border-top: 4px solid #f97316">
-                        <h3 style="color:#f97316">🏢 Alta Densidad</h3>
-                        <p style="font-size: 0.8em; font-style: italic;">"Si muchos aviones reportan anomalías en una misma celda H3, probablemente hay una tormenta severa o un fallo sistémico."</p>
-                    </div>
-                    <div class="flex-col" style="border-top: 4px solid #3b82f6">
-                        <h3 style="color:#3b82f6">🗺️ Zonas Muertas</h3>
-                        <p style="font-size: 0.8em; font-style: italic;">"Si en una ruta que siempre tiene tráfico de repente no hay nadie, algo está pasando. El sistema identifica estos 'vacíos' visualmente."</p>
-                    </div>
-                </div>
-            </section>
+      <!-- ¿De qué va el proyecto? -->
+      <section>
+        <h2>¿De qué va nuestro <span class="text-gradient">Proyecto</span>?</h2>
+        <p>Una herramienta de <strong>observabilidad global</strong> para el tráfico aéreo.</p>
+        
+        <div class="glass-box" style="margin-top: 40px;">
+          <h3>Concepto</h3>
+          <p>Queremos tener una visión analítica global para detectar patrones inusuales de forma automatizada en el trafico aereo. Nuestro sistema ingiere datos abiertos de <strong>OpenSky Network</strong> mediante transpondedores ADS-B para hallar situaciones de riesgo sin intervención humana.</p>
+        </div>
+      </section>
 
-            <!-- 5. Arquitectura del Sistema -->
-            <section data-transition="zoom">
-                <h2>Arquitectura del Sistema</h2>
-                <div style="background: rgba(22, 27, 34, 0.4); border-radius: 15px; padding: 25px; width: 85%; margin: 0 auto;">
-                    <div class="timeline-step">
-                        <span style="font-size: 1.5em; margin-right: 15px; width: 40px; text-align: center;">🌐</span>
-                        <div><strong>Ingesta:</strong> Capturamos datos continuos de la API de OpenSky.</div>
-                    </div>
-                    <div class="timeline-step">
-                        <span style="font-size: 1.5em; margin-right: 15px; width: 40px; text-align: center;">📨</span>
-                        <div><strong>Mensajería:</strong> Un Poller en Python envía los datos a Kafka KRaft (nuestro sistema nervioso central).</div>
-                    </div>
-                    <div class="timeline-step">
-                        <span style="font-size: 1.5em; margin-right: 15px; width: 40px; text-align: center; color: #f43f5e">🧠</span>
-                        <div><strong style="color: #f43f5e">Cerebro:</strong> Apache Flink aplica las reglas de detección sobre el flujo de Kafka.</div>
-                    </div>
-                    <div class="timeline-step">
-                        <span style="font-size: 1.5em; margin-right: 15px; width: 40px; text-align: center;">🔌</span>
-                        <div><strong>Entrega:</strong> Los resultados salen servidos por una API REST/WebSocket en FastAPI.</div>
-                    </div>
-                    <div class="timeline-step">
-                        <span style="font-size: 1.5em; margin-right: 15px; width: 40px; text-align: center;">🖥️</span>
-                        <div><strong>Visualización:</strong> El usuario final lo ve todo renderizado en un Dashboard Web interactivo.</div>
-                    </div>
-                </div>
-            </section>
+      <!-- Casos de Uso / Patrones a detectar -->
+      <section>
+        <h2>¿Qué anomalías detectamos?</h2>
+        
+        <div class="box-container" style="grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+          <div class="glass-box">
+            <span class="icon-large">📉</span>
+            <h3 style="font-size: 1.2em;">Altitud Brusca</h3>
+            <p style="font-size: 0.85em;">Descensos o ascensos anómalos en ventanas de 30 a 90s sugerentes de emergencias o turbulencias.</p>
+          </div>
+          <div class="glass-box">
+            <span class="icon-large">🚨</span>
+            <h3 style="font-size: 1.2em;">Alta Densidad</h3>
+            <p style="font-size: 0.85em;">Agrupamiento inusual de alertas en zonas indexadas con H3, apuntando a problemas meteorológicos o de congestión.</p>
+          </div>
+          <div class="glass-box">
+            <span class="icon-large">🕳️</span>
+            <h3 style="font-size: 1.2em;">Zonas Muertas</h3>
+            <p style="font-size: 0.85em;">Ausencia prolongada de aeronaves en celdas geográficas (H3) de tránsito regular histórico.</p>
+          </div>
+        </div>
+      </section>
 
-            <!-- 6. ¿Qué tenemos hecho? -->
-            <section data-transition="zoom">
-                <h2>¿En qué punto estamos?</h2>
-                <div style="text-align: left; margin: 40px auto; width: 80%;">
-                    <p style="margin-bottom: 25px;">✅ <strong>Contrato de Datos:</strong> Tenemos un JSON unificado cerrado y el diseño visual mockeado en el Dashboard.</p>
-                    <p style="margin-bottom: 25px;">✅ <strong>Infraestructura:</strong> La red Docker ya está levantada de forma autónoma con Kafka KRaft y Flink operativos.</p>
-                    <p style="margin-bottom: 25px; border-left: 4px solid #34d399; padding-left: 15px; background: rgba(52, 211, 153, 0.1);">🚀 <strong>En curso:</strong> Estamos en pleno desarrollo de los 'Jobs' de procesamiento (la lógica del cerebro de Flink), que es el siguiente gran Hito.</p>
-                </div>
-            </section>
+      <!-- Arquitectura -->
+      <section>
+        <h2>Arquitectura del Sistema</h2>
+        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+          
+          <div style="text-align: center;">
+            <span class="icon-large">📡</span>
+            <p style="font-size: 0.8em; margin:0;">OpenSky API</p>
+          </div>
+          
+          <span style="color: var(--accent-cyan);">➔</span>
+          
+          <div style="text-align: center; border: 1px solid var(--accent-cyan); padding: 15px; border-radius: 10px; background: rgba(34,211,238,0.1);">
+            <p style="font-size: 0.8em; margin:0; font-weight: bold; color: white;">Poller (Python)</p>
+          </div>
+          
+          <span style="color: var(--accent-cyan);">➔</span>
+          
+          <div style="text-align: center; border: 1px solid var(--accent-orange); padding: 15px; border-radius: 10px; background: rgba(249,115,22,0.1);">
+            <p style="font-size: 0.8em; margin:0; font-weight: bold; color: white;">Kafka</p>
+          </div>
+          
+          <span style="color: var(--accent-cyan);">➔</span>
+          
+          <div style="text-align: center; border: 1px solid var(--accent-purple); padding: 15px; border-radius: 10px; background: rgba(168,85,247,0.1);">
+            <p style="font-size: 0.8em; margin:0; font-weight: bold; color: white;">Apache Flink</p>
+          </div>
+          
+          <span style="color: var(--accent-cyan);">➔</span>
+          
+          <div style="text-align: center; border: 1px solid var(--accent-green); padding: 15px; border-radius: 10px; background: rgba(52,211,153,0.1);">
+            <p style="font-size: 0.8em; margin:0; font-weight: bold; color: white;">FastAPI + WSS</p>
+          </div>
 
-            <!-- 7. Un vistazo al Dashboard -->
-            <section data-transition="zoom">
-                <h2>Un Vistazo al Dashboard</h2>
-                <div class="flex-container" style="align-items: center;">
-                    <div class="flex-col">
-                        <h3>📑 Tablero Lateral</h3>
-                        <p>Lista de alertas ordenadas por estricta prioridad. Solo lo que requiere atención inmediata.</p>
-                    </div>
-                    <div class="flex-col">
-                        <h3>🗺️ Visualización</h3>
-                        <p>Mapa geoespacial con celdas hexagonales H3 para localizar visualmente las zonas (manchas de calor) de riesgo.</p>
-                    </div>
-                </div>
-                <div class="narrative">
-                    <strong>Tú dices:</strong> "Aquí pueden ver cómo el operador recibe la información. El diseño es íntegramente oscuro para reducir la fatiga visual severa que tienen los controladores tras horas de monitoreo."
-                </div>
-            </section>
+          <span style="color: var(--accent-cyan);">➔</span>
 
-            <!-- 8. Cierre -->
-            <section data-transition="zoom">
-                <h1 style="color: #c9d1d9;">El futuro de la seguridad aérea</h1>
-                <h3 style="margin-top: 30px; font-weight: 400; font-size: 1em;">Basado en Inteligencia y Datos en Tiempo Real</h3>
-                
-                <p style="margin-top: 80px; font-size: 1.2em; color: #8b949e">Gracias por su atención</p>
-                <div style="font-size: 2em; margin-top: 20px; font-weight: 800; color: #3b82f6;">¿Preguntas?</div>
-            </section>
+          <div style="text-align: center;">
+            <span class="icon-large">💻</span>
+            <p style="font-size: 0.8em; margin:0;">Dashboard Web</p>
+          </div>
 
         </div>
-    </div>
+      </section>
 
-    <!-- Scripts de Reveal.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
-    <script>
-        Reveal.initialize({
-            controls: true,
-            progress: true,
-            center: true,
-            hash: true,
-            // Configuración exacta para la "transición de zoom que queda genial"
-            transition: 'zoom', // none/fade/slide/convex/concave/zoom
-            transitionSpeed: 'default'
-        });
-        
-        // Atajo teclado para ocultar/mostrar narrativa
-        document.addEventListener('keydown', function(event) {
-            // Pulsa 'N' para alternar notas de la narrativa
-            if(event.key.toLowerCase() === 'n') {
-                const notes = document.querySelectorAll('.narrative');
-                notes.forEach(note => {
-                    note.style.display = (note.style.display === 'none') ? 'block' : 'none';
-                });
-            }
-        });
-    </script>
+      <!-- ¿Qué tenemos hecho? -->
+      <section>
+        <h2>¿Qué tenemos <span class="text-gradient-orange">hecho</span>?</h2>
+        <ul style="margin-top: 30px; display: inline-block; text-align: left; max-width: 800px;">
+          <li>Fundamentos y Contrato de Diseño definidos <span class="status-badge status-done">Completado</span></li>
+          <li>Mockup interactivo del Dashboard Analítico con Leaflet <span class="status-badge status-done">Completado</span></li>
+          <li>Documentación de API Endpoints y Diagramas de Flujo <span class="status-badge status-done">Completado</span></li>
+          <li>Infraestructura base Docker (Kafka, Zookeeper, Flink) <span class="status-badge status-progress">En Progreso</span></li>
+          <li>Poller de ingesta de datos a Kafka <span class="status-badge status-progress">En Progreso</span></li>
+          <li>Desarrollo de Jobs CEP en Apache Flink <span class="status-badge status-todo">Pendiente (Sprint 2)</span></li>
+        </ul>
+      </section>
+
+      <!-- Pantallazo Mockup -->
+      <section>
+        <h2>Un Vistazo al Dashboard</h2>
+        <p>Mockup funcional del frontend de monitoreo de incidentes.</p>
+        <div style="display: flex; justify-content: center; align-items: center; height: 50vh; background: #161b22; border: 1px solid #30363d; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+          <!-- Placeholder de imagen estilo mock -->
+          <div style="width: 100%; height: 100%; position: relative; overflow: hidden; border-radius: 20px;">
+              <div style="position: absolute; top:0; left:0; right: 0; padding: 10px 20px; background: #0d1117; display: flex; justify-content: space-between; border-bottom: 1px solid #30363d;">
+                 <span style="color:var(--accent-cyan); font-weight: bold;">[OpenSky] Análisis Táctico</span>
+                 <div>
+                    <span style="margin-right: 15px; font-size: 0.8em; color: var(--accent-red);">● 12 Anomalías Verticales</span>
+                    <span style="font-size: 0.8em; color: var(--accent-orange);">● 3 Zonas Alta Densidad</span>
+                 </div>
+              </div>
+              <div style="position: absolute; top:45px; bottom:0; left:0; width: 300px; background: #161b22; border-right: 1px solid #30363d; padding: 20px;">
+                 <div style="padding: 10px; background: rgba(244,63,94,0.1); border-left: 3px solid var(--accent-red); margin-bottom: 15px;">
+                    <strong style="color:var(--accent-red); font-size: 0.9em;">ALERTA CRÍTICA</strong><br>
+                    <span style="font-size: 0.8em; color: #8b949e;">Vuelo IBE3422 - Caída brusca de 5000ft en 30s.</span>
+                 </div>
+                 <div style="padding: 10px; background: rgba(249,115,22,0.1); border-left: 3px solid var(--accent-orange);">
+                    <strong style="color:var(--accent-orange); font-size: 0.9em;">ALTA DENSIDAD</strong><br>
+                    <span style="font-size: 0.8em; color: #8b949e;">Celda H3 8a283082a67 - 15 aeronaves con anomalías cercanas (MAD).</span>
+                 </div>
+              </div>
+              <div style="position: absolute; top:45px; bottom:0; left:300px; right: 0; background: url('https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/6/30/24.png') center/cover;">
+                  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: var(--accent-red); border-radius: 50%; box-shadow: 0 0 20px var(--accent-red);"></div>
+              </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Despedida -->
+      <section>
+        <span class="icon-large" style="font-size: 4em; filter: drop-shadow(0 0 20px var(--accent-green));">🚀</span>
+        <h2>¿Listos para el vuelo?</h2>
+        <p>Con Apache Flink liderando el procesamiento de streams.</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      controls: true,
+      progress: true,
+      center: true,
+      transition: 'zoom', // none/fade/slide/convex/concave/zoom
+      backgroundTransition: 'fade'
+    });
+  </script>
 </body>
 </html>

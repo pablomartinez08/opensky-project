@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,11 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       background: #0d1117;
@@ -43,7 +48,7 @@
       border-radius: 16px;
       padding: 40px;
       width: 95%;
-      max-width: 1400px;
+      max-width: 1000px;
       overflow-x: auto;
       box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
     }
@@ -104,12 +109,14 @@
     }
   </style>
 </head>
+
 <body>
 
   <h1>🛫 Arquitectura: Sistema de Detección de Anomalías de Vuelo</h1>
   <p class="subtitle">Apache Flink · Kafka · FastAPI · WebSocket · Leaflet.js</p>
 
   <div id="diagram-container">
+    <!-- SOLO cambia esta parte -->
     <pre class="mermaid">
 %%{init: {
   'theme': 'dark',
@@ -128,58 +135,60 @@
   }
 }}%%
 
-flowchart LR
+flowchart TB
 
   subgraph CAPA1["☁️ CAPA 1 — INGESTA"]
-    A["🌐 OpenSky API"]
-    B["🐍 OpenSky Poller"]
-    C["📨 Kafka: raw-flights"]
+    direction LR
+    A["🌐 OpenSky API"] --> B["🐍 OpenSky Poller"] --> C["📨 Kafka: raw-flights"]
   end
 
   subgraph CAPA2["⚡ CAPA 2 — PROCESAMIENTO · APACHE FLINK"]
+    direction LR
     D["📥 Flink KafkaSource"]
     E["🔑 keyBy·icao24"]
-    F["🏢 keyBy·celdaH3 (Densidad)"]
-    G["🗺️ keyBy·celdaH3 (Muerta)"]
+    F["📡 keyBy·celdaH3 (alta densidad)"]
+    G["🗺️ keyBy·celdaH3 (baja densidad)"]
     H["🧩 Flink CEP"]
+
+    D --> E
+    D --> F
+    D --> G
   end
 
   subgraph CAPA3["📢 CAPA 3 — ALERTAS (KAFKA)"]
-    I1["📨 flight-alerts.vertical"]
-    I2["📨 flight-alerts.densidad"]
-    I3["📨 flight-alerts.cep"]
+    direction LR
+    I1["📨 vertical"]
+    I2["📨 densidad"]
+    I3["📨 cep"]
   end
 
-  subgraph CAPA3B["📜 CAPA 3B — SCHEMA / CONTRACT"]
-    S["📐 JSON Schema / Avro"]
+  subgraph CAPA3B["📜 SCHEMA"]
+    S["📐 JSON / Avro"]
   end
 
-  subgraph CAPA4["🚀 CAPA 4 — BACKEND (STATELESS GATEWAY)"]
-    J["🔄 aiokafka Consumer"]
-    K["🔌 WebSocket /ws/alerts"]
+  subgraph CAPA4["🚀 BACKEND"]
+    direction LR
+    J["🔄 Kafka Consumer"] --> K["🔌 WebSocket"]
   end
 
-  subgraph CAPA5["🖥️ CAPA 5 — FRONTEND"]
-    L["🗺️ Leaflet / Deck.gl"]
+  subgraph CAPA5["🖥️ FRONTEND"]
+    L["🗺️ Mapa"]
   end
 
-  A --> B --> C --> D
+  %% Flujo vertical principal
+  CAPA1 --> CAPA2
+  CAPA2 --> CAPA3
+  CAPA3 --> CAPA3B
+  CAPA3B --> CAPA4
+  CAPA4 --> CAPA5
 
-  D --> E
-  D --> F
-  D --> G
-
+  %% Conexiones internas
   E --> I1
   F --> I2
   G --> I2
   H --> I3
 
-  I1 --> S
-  I2 --> S
-  I3 --> S
-
-  S --> J --> K --> L
-
+  %% Estilos (igual que antes)
   style A fill:#0d4a6b,stroke:#22d3ee,stroke-width:2px,color:#e0f2fe
   style B fill:#4a3728,stroke:#facc15,stroke-width:2px,color:#fef9c3
   style C fill:#4a2c17,stroke:#f97316,stroke-width:2px,color:#ffedd5
@@ -202,16 +211,28 @@ flowchart LR
   style CAPA3B fill:#111827,stroke:#60a5fa,stroke-width:2px,color:#60a5fa
   style CAPA4 fill:#0a1a14,stroke:#34d399,stroke-width:2px,color:#34d399
   style CAPA5 fill:#150d26,stroke:#a78bfa,stroke-width:2px,color:#a78bfa
-    </pre>
+</pre>
   </div>
 
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#22d3ee;"></div> Ingesta</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#f43f5e;"></div> Flink</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#f97316;"></div> Kafka</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div> Schema</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#34d399;"></div> Backend</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa;"></div> Frontend</div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#22d3ee;"></div> Ingesta
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#f43f5e;"></div> Flink
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#f97316;"></div> Kafka
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#60a5fa;"></div> Schema
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#34d399;"></div> Backend
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#a78bfa;"></div> Frontend
+    </div>
   </div>
 
   <script type="module">
@@ -230,4 +251,5 @@ flowchart LR
   </script>
 
 </body>
+
 </html>
