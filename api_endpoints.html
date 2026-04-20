@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Endpoints — Sistema de Detección de Anomalías de Vuelo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #1c2333;
+      --border: #30363d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --orange: #f97316;
+      --red: #f43f5e;
+      --blue: #3b82f6;
+      --purple: #a855f7;
+      --yellow: #facc15;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      padding: 50px 20px 80px;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    /* ══════ HEADER ══════ */
+    .page-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .page-header .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .base-url-box {
+      display: inline-block;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--cyan);
+    }
+
+    /* ══════ INFO BOX ══════ */
+    .info-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--cyan);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 40px;
+    }
+    .info-box h3 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--cyan);
+      margin-bottom: 10px;
+    }
+    .info-box p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .info-box code {
+      background: rgba(34,211,238,0.08);
+      color: var(--cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+
+    /* ══════ SECTION / ENDPOINT ══════ */
+    .section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin: 48px 0 20px;
+    }
+
+    .endpoint-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .endpoint-card:hover {
+      border-color: #484f58;
+    }
+
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 24px;
+      cursor: pointer;
+    }
+
+    .method-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+      min-width: 52px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .method-get { background: rgba(34,211,238,0.12); color: var(--cyan); border: 1px solid rgba(34,211,238,0.25); }
+    .method-ws  { background: rgba(168,85,247,0.12); color: var(--purple); border: 1px solid rgba(168,85,247,0.25); }
+    .method-post { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .method-delete { background: rgba(244,63,94,0.12); color: var(--red); border: 1px solid rgba(244,63,94,0.25); }
+
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+    }
+    .endpoint-desc-short {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .endpoint-body {
+      padding: 0 24px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .endpoint-section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      margin: 18px 0 8px;
+    }
+
+    .endpoint-body p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .endpoint-body p strong { color: var(--text-primary); }
+
+    /* Params table */
+    .params-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+    }
+    .params-table th {
+      text-align: left;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .params-table td {
+      font-size: 0.78rem;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(48,54,61,0.4);
+      vertical-align: top;
+    }
+    .params-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--cyan);
+      font-weight: 600;
+      width: 160px;
+    }
+    .params-table td:nth-child(2) {
+      color: var(--orange);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      width: 100px;
+    }
+    .params-table td:last-child {
+      color: var(--text-secondary);
+    }
+    .param-required {
+      display: inline-block;
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(244,63,94,0.12);
+      color: var(--red);
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-left: 6px;
+    }
+    .param-optional {
+      display: inline-block;
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(139,148,158,0.12);
+      color: var(--text-secondary);
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-left: 6px;
+    }
+
+    /* JSON block */
+    .json-block {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 8px;
+      overflow-x: auto;
+    }
+    .json-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      line-height: 1.65;
+      color: var(--text-primary);
+      white-space: pre;
+    }
+    .jk { color: #79c0ff; }   /* key */
+    .js { color: #a5d6ff; }   /* string */
+    .jn { color: #f2cc60; }   /* number */
+    .jb { color: #ff7b72; }   /* bool/null */
+    .jc { color: #484f58; }   /* comment */
+
+    /* Status codes */
+    .status-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .status-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+    .status-2xx { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
+    .status-4xx { background: rgba(249,115,22,0.12); color: var(--orange); border: 1px solid rgba(249,115,22,0.2); }
+    .status-5xx { background: rgba(244,63,94,0.12); color: var(--red); border: 1px solid rgba(244,63,94,0.2); }
+
+    /* ══════ SCHEMA REF ══════ */
+    .schema-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .schema-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .field-grid {
+      display: grid;
+      grid-template-columns: 180px 100px 1fr;
+      gap: 0;
+    }
+    .field-grid .fh {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .field-grid .fc {
+      font-size: 0.78rem;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(48,54,61,0.4);
+    }
+    .field-grid .fc:nth-child(3n+1) {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--cyan);
+      font-weight: 600;
+    }
+    .field-grid .fc:nth-child(3n+2) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--orange);
+    }
+    .field-grid .fc:nth-child(3n) {
+      color: var(--text-secondary);
+    }
+    .field-tag {
+      display: inline-block;
+      font-size: 0.55rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-left: 4px;
+    }
+    .tag-vert { background: rgba(244,63,94,0.12); color: var(--red); }
+    .tag-dens { background: rgba(249,115,22,0.12); color: var(--orange); }
+    .tag-dead { background: rgba(59,130,246,0.12); color: var(--blue); }
+    .tag-cep  { background: rgba(168,85,247,0.12); color: var(--purple); }
+
+    /* ══════ FOOTER ══════ */
+    .page-footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid #21262d;
+      color: #484f58;
+      font-size: 0.72rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ═══ HEADER ═══ -->
+    <div class="page-header">
+      <h1>🔌 API Endpoints</h1>
+      <p class="subtitle">Contrato Backend (FastAPI) para el frontend del sistema de detección de anomalías</p>
+      <div class="base-url-box">Base URL: http://localhost:8000/api/v1</div>
+    </div>
+
+    <!-- ═══ INFO ═══ -->
+    <div class="info-box">
+      <h3>📋 Para el desarrollador frontend</h3>
+      <p>
+        El backend expone <strong>endpoints REST</strong> para estado y consultas históricas, y un <strong>WebSocket</strong> para
+        recibir alertas en tiempo real. Todos los datos de alertas siguen el esquema definido en
+        <code>alert_schema_contract.json</code> (v1.1.0).<br>
+        Los tipos de alerta son: <code>vertical</code>, <code>alta_densidad</code>, <code>zona_muerta</code>,
+        <code>cep_aterrizaje_emergencia</code>.<br>
+        Las severidades son: <code>baja</code>, <code>media</code>, <code>alta</code>, <code>critica</code>.<br>
+        Los estados del ciclo de vida son: <code>inicio</code>, <code>actualizacion</code>, <code>fin</code>.
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  SECCIÓN 1: HEALTH / STATUS            -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section-title">🏥 Health & Estado</div>
+
+    <!-- GET /health -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-path">/health</span>
+        <span class="endpoint-desc-short">Estado del servidor</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Comprueba si el backend está operativo y conectado a Kafka.</p>
+        <div class="endpoint-section-label">Respuesta 200</div>
+        <div class="json-block">
+<pre>{
+  <span class="jk">"status"</span>: <span class="js">"ok"</span>,
+  <span class="jk">"kafka_connected"</span>: <span class="jb">true</span>,
+  <span class="jk">"uptime_seconds"</span>: <span class="jn">3421</span>,
+  <span class="jk">"version"</span>: <span class="js">"1.0.0"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- GET /stats -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-path">/stats</span>
+        <span class="endpoint-desc-short">Métricas globales para el dashboard</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Devuelve los contadores que alimentan la barra de estadísticas del sidebar: vuelos activos, total de alertas, y desglose por tipo y severidad.</p>
+        <div class="endpoint-section-label">Respuesta 200</div>
+        <div class="json-block">
+<pre>{
+  <span class="jk">"vuelos_activos"</span>: <span class="jn">1247</span>,
+  <span class="jk">"total_alertas"</span>: <span class="jn">12</span>,
+  <span class="jk">"alertas_criticas"</span>: <span class="jn">3</span>,
+  <span class="jk">"por_tipo"</span>: {
+    <span class="jk">"vertical"</span>: <span class="jn">5</span>,
+    <span class="jk">"alta_densidad"</span>: <span class="jn">3</span>,
+    <span class="jk">"zona_muerta"</span>: <span class="jn">3</span>,
+    <span class="jk">"cep_aterrizaje_emergencia"</span>: <span class="jn">1</span>
+  },
+  <span class="jk">"por_severidad"</span>: {
+    <span class="jk">"baja"</span>: <span class="jn">0</span>,
+    <span class="jk">"media"</span>: <span class="jn">4</span>,
+    <span class="jk">"alta"</span>: <span class="jn">5</span>,
+    <span class="jk">"critica"</span>: <span class="jn">3</span>
+  },
+  <span class="jk">"ultima_actualizacion"</span>: <span class="js">"2026-03-24T18:31:44Z"</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  SECCIÓN 2: ALERTAS (REST)             -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section-title">🚨 Alertas (REST)</div>
+
+    <!-- GET /alerts -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-path">/alerts</span>
+        <span class="endpoint-desc-short">Listar alertas con filtros y paginación</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Devuelve las alertas activas, ordenadas por timestamp descendente. Soporta filtrado por tipo, severidad y paginación. <strong>Este es el endpoint principal para poblar el sidebar.</strong></p>
+
+        <div class="endpoint-section-label">Query Parameters</div>
+        <table class="params-table">
+          <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
+          <tr>
+            <td>tipo <span class="param-optional">opcional</span></td>
+            <td>string</td>
+            <td>Filtrar por tipo: <code>vertical</code> | <code>alta_densidad</code> | <code>zona_muerta</code> | <code>cep_aterrizaje_emergencia</code></td>
+          </tr>
+          <tr>
+            <td>severidad <span class="param-optional">opcional</span></td>
+            <td>string</td>
+            <td>Filtrar por severidad: <code>baja</code> | <code>media</code> | <code>alta</code> | <code>critica</code></td>
+          </tr>
+          <tr>
+            <td>estado <span class="param-optional">opcional</span></td>
+            <td>string</td>
+            <td>Filtrar por estado: <code>inicio</code> | <code>actualizacion</code> | <code>fin</code></td>
+          </tr>
+          <tr>
+            <td>limit <span class="param-optional">opcional</span></td>
+            <td>int</td>
+            <td>Máx. alertas a devolver. Default: <code>50</code>, Máx: <code>200</code></td>
+          </tr>
+          <tr>
+            <td>offset <span class="param-optional">opcional</span></td>
+            <td>int</td>
+            <td>Offset para paginación. Default: <code>0</code></td>
+          </tr>
+        </table>
+
+        <div class="endpoint-section-label">Ejemplo: GET /alerts?tipo=vertical&severidad=alta&limit=10</div>
+        <div class="json-block">
+<pre>{
+  <span class="jk">"total"</span>: <span class="jn">5</span>,
+  <span class="jk">"limit"</span>: <span class="jn">10</span>,
+  <span class="jk">"offset"</span>: <span class="jn">0</span>,
+  <span class="jk">"alertas"</span>: [
+    {
+      <span class="jk">"tipo_alerta"</span>: <span class="js">"vertical"</span>,
+      <span class="jk">"estado"</span>: <span class="js">"inicio"</span>,
+      <span class="jk">"severidad"</span>: <span class="js">"alta"</span>,
+      <span class="jk">"timestamp"</span>: <span class="js">"2026-03-24T18:30:12Z"</span>,
+      <span class="jk">"latitud"</span>: <span class="jn">48.3456</span>,
+      <span class="jk">"longitud"</span>: <span class="jn">11.7890</span>,
+      <span class="jk">"origen_pais"</span>: <span class="js">"Germany"</span>,
+      <span class="jk">"en_tierra"</span>: <span class="jb">false</span>,
+      <span class="jk">"icao24"</span>: <span class="js">"3c6752"</span>,
+      <span class="jk">"callsign"</span>: <span class="js">"DLH1234"</span>,
+      <span class="jk">"altitud_actual"</span>: <span class="jn">9100</span>,
+      <span class="jk">"altitud_previa"</span>: <span class="jn">11200</span>,
+      <span class="jk">"delta_altitud"</span>: <span class="jn">-2100</span>,
+      <span class="jk">"velocidad_vertical_ms"</span>: <span class="jn">-105.0</span>,
+      <span class="jk">"velocidad_kmh"</span>: <span class="jn">852.3</span>,
+      <span class="jk">"heading"</span>: <span class="jn">210.5</span>
+    }
+    <span class="jc">// ... más alertas</span>
+  ]
+}</pre>
+        </div>
+
+        <div class="endpoint-section-label">Códigos de respuesta</div>
+        <div class="status-list">
+          <span class="status-tag status-2xx">200 OK</span>
+          <span class="status-tag status-4xx">400 Parámetro inválido</span>
+          <span class="status-tag status-5xx">500 Error interno</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GET /alerts/:id -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-path">/alerts/{alert_id}</span>
+        <span class="endpoint-desc-short">Detalle de una alerta</span>
+      </div>
+      <div class="endpoint-body">
+        <p>Devuelve el JSON completo de una alerta por su ID. Incluye todos los campos (comunes + opcionales según tipo). <strong>Usar para el panel de detalle al hacer click en una tarjeta.</strong></p>
+
+        <div class="endpoint-section-label">Path Parameters</div>
+        <table class="params-table">
+          <tr><th>Parámetro</th><th>Tipo</th><th>Descripción</th></tr>
+          <tr>
+            <td>alert_id <span class="param-required">requerido</span></td>
+            <td>string</td>
+            <td>UUID de la alerta (generado por el backend al consumir de Kafka)</td>
+          </tr>
+        </table>
+
+        <div class="endpoint-section-label">Respuesta 200 (ejemplo: alta_densidad)</div>
+        <div class="json-block">
+<pre>{
+  <span class="jk">"id"</span>: <span class="js">"a1b2c3d4-e5f6-7890-abcd-ef1234567890"</span>,
+  <span class="jk">"tipo_alerta"</span>: <span class="js">"alta_densidad"</span>,
+  <span class="jk">"estado"</span>: <span class="js">"actualizacion"</span>,
+  <span class="jk">"severidad"</span>: <span class="js">"media"</span>,
+  <span class="jk">"timestamp"</span>: <span class="js">"2026-03-24T18:30:00Z"</span>,
+  <span class="jk">"latitud"</span>: <span class="jn">40.4719</span>,
+  <span class="jk">"longitud"</span>: <span class="jn">-3.5626</span>,
+  <span class="jk">"origen_pais"</span>: <span class="jb">null</span>,
+  <span class="jk">"en_tierra"</span>: <span class="jb">null</span>,
+  <span class="jk">"celda_h3"</span>: <span class="js">"86395b467ffffff"</span>,
+  <span class="jk">"num_vuelos_actual"</span>: <span class="jn">85</span>,
+  <span class="jk">"vuelos_afectados"</span>: [<span class="js">"IBE301"</span>, <span class="js">"RYR872"</span>, <span class="js">"VLG44A"</span>],
+  <span class="jk">"ventana_inicio"</span>: <span class="js">"2026-03-24T18:25:00Z"</span>,
+  <span class="jk">"ventana_fin"</span>: <span class="js">"2026-03-24T18:30:00Z"</span>
+}</pre>
+        </div>
+
+        <div class="endpoint-section-label">Códigos de respuesta</div>
+        <div class="status-list">
+          <span class="status-tag status-2xx">200 OK</span>
+          <span class="status-tag status-4xx">404 Alerta no encontrada</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  SECCIÓN 3: WEBSOCKET                  -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section-title">⚡ WebSocket (Tiempo Real)</div>
+
+    <!-- WS /ws/alerts -->
+    <div class="endpoint-card">
+      <div class="endpoint-header">
+        <span class="method-badge method-ws">WS</span>
+        <span class="endpoint-path">ws://localhost:8000/ws/alerts</span>
+        <span class="endpoint-desc-short">Stream de alertas en tiempo real</span>
+      </div>
+      <div class="endpoint-body">
+        <p>
+          Conexión WebSocket que emite cada alerta nueva en tiempo real conforme el backend las consume del topic
+          <code>flight-alerts</code> de Kafka. <strong>Este es el canal principal para actualizar el mapa y el sidebar sin polling.</strong>
+        </p>
+
+        <div class="endpoint-section-label">Conexión</div>
+        <div class="json-block">
+<pre><span class="jc">// JavaScript — conectar al WebSocket</span>
+<span class="jk">const</span> ws = <span class="jk">new</span> WebSocket(<span class="js">"ws://localhost:8000/ws/alerts"</span>);
+
+ws.onopen = () => {
+  console.log(<span class="js">"✅ WebSocket conectado"</span>);
+};
+
+ws.onmessage = (event) => {
+  <span class="jk">const</span> alerta = JSON.parse(event.data);
+  <span class="jc">// alerta tiene el mismo schema que GET /alerts/{id}</span>
+  console.log(<span class="js">"🚨 Nueva alerta:"</span>, alerta.tipo_alerta, alerta.severidad);
+  
+  <span class="jc">// → Añadir tarjeta al sidebar</span>
+  <span class="jc">// → Añadir marker al mapa</span>
+  <span class="jc">// → Actualizar contadores</span>
+};
+
+ws.onclose = () => {
+  console.log(<span class="js">"🔌 WebSocket desconectado — reconectando..."</span>);
+  <span class="jc">// Implementar reconnect con backoff exponencial</span>
+};</pre>
+        </div>
+
+        <div class="endpoint-section-label">Formato de cada mensaje recibido</div>
+        <p>Cada mensaje es un JSON con <strong>exactamente el mismo esquema</strong> que <code>GET /alerts/{id}</code>. Los campos presentes dependen del <code>tipo_alerta</code>.</p>
+        <div class="json-block">
+<pre><span class="jc">// Ejemplo: mensaje recibido (tipo vertical)</span>
+{
+  <span class="jk">"id"</span>: <span class="js">"f47ac10b-58cc-4372-a567-0e02b2c3d479"</span>,
+  <span class="jk">"tipo_alerta"</span>: <span class="js">"vertical"</span>,
+  <span class="jk">"estado"</span>: <span class="js">"inicio"</span>,
+  <span class="jk">"severidad"</span>: <span class="js">"alta"</span>,
+  <span class="jk">"timestamp"</span>: <span class="js">"2026-03-24T18:30:12Z"</span>,
+  <span class="jk">"latitud"</span>: <span class="jn">48.3456</span>,
+  <span class="jk">"longitud"</span>: <span class="jn">11.7890</span>,
+  <span class="jk">"origen_pais"</span>: <span class="js">"Germany"</span>,
+  <span class="jk">"en_tierra"</span>: <span class="jb">false</span>,
+  <span class="jk">"icao24"</span>: <span class="js">"3c6752"</span>,
+  <span class="jk">"callsign"</span>: <span class="js">"DLH1234"</span>,
+  <span class="jk">"altitud_actual"</span>: <span class="jn">9100</span>,
+  <span class="jk">"altitud_previa"</span>: <span class="jn">11200</span>,
+  <span class="jk">"delta_altitud"</span>: <span class="jn">-2100</span>,
+  <span class="jk">"velocidad_vertical_ms"</span>: <span class="jn">-105.0</span>,
+  <span class="jk">"velocidad_kmh"</span>: <span class="jn">852.3</span>,
+  <span class="jk">"heading"</span>: <span class="jn">210.5</span>
+}
+
+<span class="jc">// Ejemplo: mensaje recibido (tipo zona_muerta)</span>
+{
+  <span class="jk">"id"</span>: <span class="js">"c7d8e9f0-1234-5678-9abc-def012345678"</span>,
+  <span class="jk">"tipo_alerta"</span>: <span class="js">"zona_muerta"</span>,
+  <span class="jk">"estado"</span>: <span class="js">"inicio"</span>,
+  <span class="jk">"severidad"</span>: <span class="js">"alta"</span>,
+  <span class="jk">"timestamp"</span>: <span class="js">"2026-03-24T18:30:00Z"</span>,
+  <span class="jk">"latitud"</span>: <span class="jn">42.7812</span>,
+  <span class="jk">"longitud"</span>: <span class="jn">0.5634</span>,
+  <span class="jk">"origen_pais"</span>: <span class="jb">null</span>,
+  <span class="jk">"en_tierra"</span>: <span class="jb">null</span>,
+  <span class="jk">"celda_h3"</span>: <span class="js">"841f91fffffffff"</span>,
+  <span class="jk">"num_vuelos_actual"</span>: <span class="jn">0</span>,
+  <span class="jk">"num_vuelos_previo"</span>: <span class="jn">12</span>,
+  <span class="jk">"ventana_inicio"</span>: <span class="js">"2026-03-24T18:25:00Z"</span>,
+  <span class="jk">"ventana_fin"</span>: <span class="js">"2026-03-24T18:30:00Z"</span>
+}
+
+<span class="jc">// Ejemplo: mensaje recibido (tipo cep_aterrizaje_emergencia)</span>
+{
+  <span class="jk">"id"</span>: <span class="js">"d9e0f1a2-3456-7890-bcde-f01234567890"</span>,
+  <span class="jk">"tipo_alerta"</span>: <span class="js">"cep_aterrizaje_emergencia"</span>,
+  <span class="jk">"estado"</span>: <span class="js">"fin"</span>,
+  <span class="jk">"severidad"</span>: <span class="js">"critica"</span>,
+  <span class="jk">"timestamp"</span>: <span class="js">"2026-03-24T18:31:44Z"</span>,
+  <span class="jk">"latitud"</span>: <span class="jn">47.4502</span>,
+  <span class="jk">"longitud"</span>: <span class="jn">8.5618</span>,
+  <span class="jk">"origen_pais"</span>: <span class="js">"Switzerland"</span>,
+  <span class="jk">"en_tierra"</span>: <span class="jb">true</span>,
+  <span class="jk">"icao24"</span>: <span class="js">"4b1806"</span>,
+  <span class="jk">"callsign"</span>: <span class="js">"SWR285"</span>,
+  <span class="jk">"velocidad_kmh"</span>: <span class="jn">0.0</span>,
+  <span class="jk">"heading"</span>: <span class="jn">135.2</span>,
+  <span class="jk">"patron"</span>: <span class="js">"descenso_brusco → velocidad_cero"</span>,
+  <span class="jk">"altitud_inicio_patron"</span>: <span class="jn">8200</span>,
+  <span class="jk">"altitud_final"</span>: <span class="jn">430</span>,
+  <span class="jk">"duracion_vel_cero_seg"</span>: <span class="jn">78</span>
+}</pre>
+        </div>
+
+        <div class="endpoint-section-label">Reconexión recomendada</div>
+        <p>Si el WebSocket se cierra, implementar <strong>reconnect con backoff exponencial</strong> (1s, 2s, 4s, 8s... hasta 30s máx). Mientras esté desconectado, usar <code>GET /alerts</code> como fallback.</p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  SECCIÓN 4: SCHEMA DE ALERTAS          -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section-title">📐 Schema de alertas — Campos por tipo</div>
+
+    <div class="info-box" style="border-left-color: var(--orange);">
+      <h3>⚠️ Regla clave</h3>
+      <p>
+        <strong>Todos los campos comunes están SIEMPRE presentes</strong> en cada alerta. Los campos opcionales pueden ser
+        <code>null</code> — el frontend debe manejar nulls en la renderización. El campo <code>tipo_alerta</code> determina
+        qué campos opcionales tendrán valor.
+      </p>
+    </div>
+
+    <!-- Campos comunes -->
+    <div class="schema-card">
+      <h3>📌 Campos comunes (siempre presentes)</h3>
+      <div class="field-grid">
+        <div class="fh">Campo</div><div class="fh">Tipo</div><div class="fh">Descripción</div>
+        <div class="fc">tipo_alerta</div><div class="fc">string</div><div class="fc">Enum: <code>vertical</code> | <code>alta_densidad</code> | <code>zona_muerta</code> | <code>cep_aterrizaje_emergencia</code></div>
+        <div class="fc">estado</div><div class="fc">string</div><div class="fc">Ciclo de vida: <code>inicio</code> | <code>actualizacion</code> | <code>fin</code></div>
+        <div class="fc">severidad</div><div class="fc">string</div><div class="fc">Enum: <code>baja</code> | <code>media</code> | <code>alta</code> | <code>critica</code></div>
+        <div class="fc">timestamp</div><div class="fc">string</div><div class="fc">ISO 8601 — momento del evento</div>
+        <div class="fc">latitud</div><div class="fc">number</div><div class="fc">Coordenada del evento o centro de celda H3</div>
+        <div class="fc">longitud</div><div class="fc">number</div><div class="fc">Coordenada del evento o centro de celda H3</div>
+        <div class="fc">origen_pais</div><div class="fc">string|null</div><div class="fc">País de origen de la aeronave. <code>null</code> si es alerta de zona</div>
+        <div class="fc">en_tierra</div><div class="fc">bool|null</div><div class="fc">Si la aeronave está en superficie. <code>null</code> si es alerta de zona</div>
+      </div>
+    </div>
+
+    <!-- Campos opcionales por tipo -->
+    <div class="schema-card">
+      <h3>🔀 Campos opcionales (según tipo_alerta)</h3>
+      <div class="field-grid">
+        <div class="fh">Campo</div><div class="fh">Tipo</div><div class="fh">Presente en</div>
+        <div class="fc">icao24</div><div class="fc">string|null</div><div class="fc"><span class="field-tag tag-vert">vertical</span> <span class="field-tag tag-cep">cep</span></div>
+        <div class="fc">callsign</div><div class="fc">string|null</div><div class="fc"><span class="field-tag tag-vert">vertical</span> <span class="field-tag tag-cep">cep</span></div>
+        <div class="fc">altitud_actual</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-vert">vertical</span></div>
+        <div class="fc">altitud_previa</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-vert">vertical</span></div>
+        <div class="fc">delta_altitud</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-vert">vertical</span> — negativo = descenso</div>
+        <div class="fc">velocidad_vertical_ms</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-vert">vertical</span> — m/s</div>
+        <div class="fc">velocidad_kmh</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-vert">vertical</span> <span class="field-tag tag-cep">cep</span></div>
+        <div class="fc">heading</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-vert">vertical</span> <span class="field-tag tag-cep">cep</span> — grados</div>
+        <div class="fc">celda_h3</div><div class="fc">string|null</div><div class="fc"><span class="field-tag tag-dens">alta_densidad</span> <span class="field-tag tag-dead">zona_muerta</span></div>
+        <div class="fc">num_vuelos_actual</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-dens">alta_densidad</span> <span class="field-tag tag-dead">zona_muerta</span></div>
+        <div class="fc">num_vuelos_previo</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-dead">zona_muerta</span></div>
+        <div class="fc">vuelos_afectados</div><div class="fc">array|null</div><div class="fc"><span class="field-tag tag-dens">alta_densidad</span> — lista de callsigns</div>
+        <div class="fc">ventana_inicio</div><div class="fc">string|null</div><div class="fc"><span class="field-tag tag-dens">alta_densidad</span> <span class="field-tag tag-dead">zona_muerta</span> — ISO 8601</div>
+        <div class="fc">ventana_fin</div><div class="fc">string|null</div><div class="fc"><span class="field-tag tag-dens">alta_densidad</span> <span class="field-tag tag-dead">zona_muerta</span> — ISO 8601</div>
+        <div class="fc">patron</div><div class="fc">string|null</div><div class="fc"><span class="field-tag tag-cep">cep</span> — descripción del patrón</div>
+        <div class="fc">altitud_inicio_patron</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-cep">cep</span> — metros</div>
+        <div class="fc">altitud_final</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-cep">cep</span> — metros</div>
+        <div class="fc">duracion_vel_cero_seg</div><div class="fc">number|null</div><div class="fc"><span class="field-tag tag-cep">cep</span> — segundos</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!--  SECCIÓN 5: GUÍA FRONTEND              -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section-title">🎨 Guía de mapeo Frontend</div>
+
+    <div class="schema-card">
+      <h3>🗂️ Cómo renderizar cada tipo de alerta</h3>
+      <table class="params-table">
+        <tr><th>tipo_alerta</th><th>Icono</th><th>Título tarjeta</th></tr>
+        <tr>
+          <td>vertical</td>
+          <td style="color: var(--red);">⚠️</td>
+          <td style="color: var(--text-secondary);">Mostrar <code>callsign</code> + <code>delta_altitud</code> + <code>velocidad_kmh</code></td>
+        </tr>
+        <tr>
+          <td>alta_densidad</td>
+          <td style="color: var(--orange);">📡</td>
+          <td style="color: var(--text-secondary);">Mostrar <code>celda_h3</code> (abreviada) + <code>num_vuelos_actual</code> vuelos</td>
+        </tr>
+        <tr>
+          <td>zona_muerta</td>
+          <td style="color: var(--blue);">🗺️</td>
+          <td style="color: var(--text-secondary);">Mostrar <code>celda_h3</code> + <code>num_vuelos_actual</code> vs <code>num_vuelos_previo</code></td>
+        </tr>
+        <tr>
+          <td>cep_aterrizaje_emergencia</td>
+          <td style="color: var(--purple);">🧩</td>
+          <td style="color: var(--text-secondary);">Mostrar <code>callsign</code> + <code>patron</code> + <code>duracion_vel_cero_seg</code></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="schema-card">
+      <h3>🗺️ Cómo dibujar en el mapa</h3>
+      <table class="params-table">
+        <tr><th>tipo_alerta</th><th>Color</th><th>Representación en mapa</th></tr>
+        <tr>
+          <td>vertical</td>
+          <td style="color: var(--red);">#f43f5e</td>
+          <td style="color: var(--text-secondary);">Marker ✈️ en <code>latitud</code>/<code>longitud</code></td>
+        </tr>
+        <tr>
+          <td>alta_densidad</td>
+          <td style="color: var(--orange);">#f97316</td>
+          <td style="color: var(--text-secondary);">Hexágono H3 en <code>latitud</code>/<code>longitud</code> (centro de celda)</td>
+        </tr>
+        <tr>
+          <td>zona_muerta</td>
+          <td style="color: var(--blue);">#3b82f6</td>
+          <td style="color: var(--text-secondary);">Hexágono H3 con borde discontinuo en <code>latitud</code>/<code>longitud</code></td>
+        </tr>
+        <tr>
+          <td>cep_aterrizaje_emergencia</td>
+          <td style="color: var(--purple);">#a855f7</td>
+          <td style="color: var(--text-secondary);">Marker ✈️ pulsante en <code>latitud</code>/<code>longitud</code></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ═══ FOOTER ═══ -->
+    <div class="page-footer">
+      API Endpoints — Sistema de Detección de Anomalías de Vuelo — v1.0 — Schema v1.1.0 — 2026
+    </div>
+
+  </div>
+</body>
+</html>
