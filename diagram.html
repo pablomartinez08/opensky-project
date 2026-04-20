@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arquitectura: Sistema de Detección de Anomalías de Vuelo con Flink</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #58a6ff;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    #diagram-container {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 16px;
+      padding: 40px;
+      width: 95%;
+      max-width: 1400px;
+      overflow-x: auto;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Overrides originales */
+    .mermaid .node rect,
+    .mermaid .node polygon {
+      rx: 8;
+      ry: 8;
+    }
+
+    .mermaid .edgeLabel {
+      font-size: 11px !important;
+      font-family: 'Inter', sans-serif !important;
+    }
+
+    .mermaid .nodeLabel {
+      font-family: 'Inter', sans-serif !important;
+      font-weight: 600 !important;
+    }
+
+    .mermaid .cluster rect {
+      rx: 12 !important;
+      ry: 12 !important;
+    }
+
+    .mermaid .cluster-label .nodeLabel {
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.5px;
+    }
+
+    .legend {
+      margin-top: 30px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: #8b949e;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🛫 Arquitectura: Sistema de Detección de Anomalías de Vuelo</h1>
+  <p class="subtitle">Apache Flink · Kafka · FastAPI · WebSocket · Leaflet.js</p>
+
+  <div id="diagram-container">
+    <pre class="mermaid">
+%%{init: {
+  'theme': 'dark',
+  'themeVariables': {
+    'primaryColor': '#1f2937',
+    'primaryTextColor': '#e6edf3',
+    'primaryBorderColor': '#58a6ff',
+    'lineColor': '#8b949e',
+    'secondaryColor': '#161b22',
+    'tertiaryColor': '#0d1117',
+    'fontSize': '13px',
+    'fontFamily': 'Inter, sans-serif',
+    'clusterBkg': '#1c2333',
+    'clusterBorder': '#30363d',
+    'edgeLabelBackground': '#161b22'
+  }
+}}%%
+
+flowchart LR
+
+  subgraph CAPA1["☁️ CAPA 1 — INGESTA"]
+    A["🌐 OpenSky API"]
+    B["🐍 OpenSky Poller"]
+    C["📨 Kafka: raw-flights"]
+  end
+
+  subgraph CAPA2["⚡ CAPA 2 — PROCESAMIENTO · APACHE FLINK"]
+    D["📥 Flink KafkaSource"]
+    E["🔑 keyBy·icao24"]
+    F["🏢 keyBy·celdaH3 (Densidad)"]
+    G["🗺️ keyBy·celdaH3 (Muerta)"]
+    H["🧩 Flink CEP"]
+  end
+
+  subgraph CAPA3["📢 CAPA 3 — ALERTAS (KAFKA)"]
+    I1["📨 flight-alerts.vertical"]
+    I2["📨 flight-alerts.densidad"]
+    I3["📨 flight-alerts.cep"]
+  end
+
+  subgraph CAPA3B["📜 CAPA 3B — SCHEMA / CONTRACT"]
+    S["📐 JSON Schema / Avro"]
+  end
+
+  subgraph CAPA4["🚀 CAPA 4 — BACKEND (STATELESS GATEWAY)"]
+    J["🔄 aiokafka Consumer"]
+    K["🔌 WebSocket /ws/alerts"]
+  end
+
+  subgraph CAPA5["🖥️ CAPA 5 — FRONTEND"]
+    L["🗺️ Leaflet / Deck.gl"]
+  end
+
+  A --> B --> C --> D
+
+  D --> E
+  D --> F
+  D --> G
+
+  E --> I1
+  F --> I2
+  G --> I2
+  H --> I3
+
+  I1 --> S
+  I2 --> S
+  I3 --> S
+
+  S --> J --> K --> L
+
+  style A fill:#0d4a6b,stroke:#22d3ee,stroke-width:2px,color:#e0f2fe
+  style B fill:#4a3728,stroke:#facc15,stroke-width:2px,color:#fef9c3
+  style C fill:#4a2c17,stroke:#f97316,stroke-width:2px,color:#ffedd5
+  style D fill:#3b1323,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6
+  style E fill:#3b1323,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6
+  style F fill:#3b1323,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6
+  style G fill:#3b1323,stroke:#f43f5e,stroke-width:2px,color:#ffe4e6
+  style H fill:#4a1942,stroke:#d946ef,stroke-width:2px,color:#fae8ff
+  style I1 fill:#4a2c17,stroke:#f97316,stroke-width:2px,color:#ffedd5
+  style I2 fill:#4a2c17,stroke:#f97316,stroke-width:2px,color:#ffedd5
+  style I3 fill:#4a2c17,stroke:#f97316,stroke-width:2px,color:#ffedd5
+  style S fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#dbeafe
+  style J fill:#14392a,stroke:#34d399,stroke-width:2px,color:#d1fae5
+  style K fill:#14392a,stroke:#34d399,stroke-width:2px,color:#d1fae5
+  style L fill:#2e1a4a,stroke:#a78bfa,stroke-width:2px,color:#ede9fe
+
+  style CAPA1 fill:#0c1a2e,stroke:#22d3ee,stroke-width:2px,color:#22d3ee
+  style CAPA2 fill:#1a0a0a,stroke:#f43f5e,stroke-width:2px,color:#f43f5e
+  style CAPA3 fill:#1a1005,stroke:#f97316,stroke-width:2px,color:#f97316
+  style CAPA3B fill:#111827,stroke:#60a5fa,stroke-width:2px,color:#60a5fa
+  style CAPA4 fill:#0a1a14,stroke:#34d399,stroke-width:2px,color:#34d399
+  style CAPA5 fill:#150d26,stroke:#a78bfa,stroke-width:2px,color:#a78bfa
+    </pre>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#22d3ee;"></div> Ingesta</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f43f5e;"></div> Flink</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f97316;"></div> Kafka</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div> Schema</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34d399;"></div> Backend</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa;"></div> Frontend</div>
+  </div>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      securityLevel: 'loose',
+      flowchart: {
+        curve: 'basis',
+        padding: 20,
+        nodeSpacing: 60,
+        rankSpacing: 80,
+        useMaxWidth: true
+      }
+    });
+  </script>
+
+</body>
+</html>

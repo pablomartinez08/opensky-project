@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario de Hitos — Sistema de Detección de Anomalías de Vuelo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #1c2333;
+      --border: #30363d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --cyan: #22d3ee;
+      --red: #f43f5e;
+      --orange: #f97316;
+      --blue: #3b82f6;
+      --green: #34d399;
+      --purple: #a855f7;
+      --yellow: #facc15;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      padding: 50px 20px 60px;
+      line-height: 1.6;
+    }
+
+    /* ——— Header ——— */
+    .page-header {
+      max-width: 1100px;
+      margin: 0 auto 16px;
+      text-align: center;
+    }
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .page-header .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* ——— Gantt Mermaid ——— */
+    .gantt-container {
+      max-width: 1100px;
+      margin: 30px auto 40px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 28px 20px;
+      overflow-x: auto;
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+    }
+    .gantt-container h2 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--cyan);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .mermaid { display: flex; justify-content: center; }
+
+    /* ——— Timeline visual ——— */
+    .timeline {
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+      padding: 10px 0;
+    }
+
+    /* Línea central */
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--cyan), var(--red), var(--orange), var(--green), var(--purple), var(--blue));
+    }
+
+    .milestone {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .milestone:nth-child(odd) { flex-direction: row; }
+    .milestone:nth-child(even) { flex-direction: row-reverse; }
+
+    .milestone-content {
+      width: 45%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .milestone-content:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    }
+
+    .milestone-spacer { width: 10%; position: relative; }
+
+    /* Dot en la línea central */
+    .milestone-dot {
+      position: absolute;
+      left: 50%;
+      top: 24px;
+      transform: translate(-50%, 0);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 3px solid;
+      z-index: 10;
+    }
+
+    /* Estados */
+    .milestone-dot.done {
+      background: var(--green);
+      border-color: var(--green);
+      box-shadow: 0 0 10px rgba(52,211,153,0.4);
+    }
+    .milestone-dot.active {
+      animation: pulse-active 2s infinite;
+    }
+    @keyframes pulse-active {
+      0%, 100% { box-shadow: 0 0 0 0 currentColor; }
+      50% { box-shadow: 0 0 0 6px transparent; }
+    }
+    .milestone-dot.pending {
+      background: var(--bg-primary);
+    }
+
+    /* Header del milestone */
+    .ms-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .ms-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .ms-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+    .ms-sprint {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 2px;
+    }
+    .ms-dates {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+    .ms-body {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .ms-body strong { color: var(--text-primary); }
+    .ms-body ul {
+      margin: 6px 0 0 16px;
+      list-style: none;
+    }
+    .ms-body ul li::before {
+      content: '▸ ';
+      font-weight: 700;
+    }
+
+    /* Status badge */
+    .ms-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-top: 12px;
+    }
+    .status-done { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+    .status-active { background: rgba(34,211,238,0.12); color: var(--cyan); border: 1px solid rgba(34,211,238,0.25); }
+    .status-pending { background: rgba(139,148,158,0.12); color: var(--text-secondary); border: 1px solid rgba(139,148,158,0.2); }
+
+    /* ——— Colores por fase ——— */
+    .phase-cyan .ms-sprint { color: var(--cyan); }
+    .phase-cyan .ms-icon { background: rgba(34,211,238,0.15); color: var(--cyan); }
+    .phase-cyan .milestone-content { border-left: 3px solid var(--cyan); }
+
+    .phase-red .ms-sprint { color: var(--red); }
+    .phase-red .ms-icon { background: rgba(244,63,94,0.15); color: var(--red); }
+    .phase-red .milestone-content { border-left: 3px solid var(--red); }
+
+    .phase-orange .ms-sprint { color: var(--orange); }
+    .phase-orange .ms-icon { background: rgba(249,115,22,0.15); color: var(--orange); }
+    .phase-orange .milestone-content { border-left: 3px solid var(--orange); }
+
+    .phase-green .ms-sprint { color: var(--green); }
+    .phase-green .ms-icon { background: rgba(52,211,153,0.15); color: var(--green); }
+    .phase-green .milestone-content { border-left: 3px solid var(--green); }
+
+    .phase-purple .ms-sprint { color: var(--purple); }
+    .phase-purple .ms-icon { background: rgba(168,85,247,0.15); color: var(--purple); }
+    .phase-purple .milestone-content { border-left: 3px solid var(--purple); }
+
+    .phase-blue .ms-sprint { color: var(--blue); }
+    .phase-blue .ms-icon { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .phase-blue .milestone-content { border-left: 3px solid var(--blue); }
+
+    .phase-yellow .ms-sprint { color: var(--yellow); }
+    .phase-yellow .ms-icon { background: rgba(250,204,21,0.15); color: var(--yellow); }
+    .phase-yellow .milestone-content { border-left: 3px solid var(--yellow); }
+
+    /* even milestone: border derecho */
+    .milestone:nth-child(even) .milestone-content {
+      border-left: 1px solid var(--border);
+      border-right: 3px solid;
+    }
+    .milestone:nth-child(even).phase-cyan .milestone-content { border-right-color: var(--cyan); }
+    .milestone:nth-child(even).phase-red .milestone-content { border-right-color: var(--red); }
+    .milestone:nth-child(even).phase-orange .milestone-content { border-right-color: var(--orange); }
+    .milestone:nth-child(even).phase-green .milestone-content { border-right-color: var(--green); }
+    .milestone:nth-child(even).phase-purple .milestone-content { border-right-color: var(--purple); }
+    .milestone:nth-child(even).phase-blue .milestone-content { border-right-color: var(--blue); }
+    .milestone:nth-child(even).phase-yellow .milestone-content { border-right-color: var(--yellow); }
+
+    /* ——— Summary bar ——— */
+    .summary-bar {
+      max-width: 1100px;
+      margin: 40px auto 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .summary-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .summary-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+    .summary-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Footer */
+    .page-footer {
+      max-width: 1100px;
+      margin: 40px auto 0;
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid #21262d;
+      color: #484f58;
+      font-size: 0.72rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .timeline::before { left: 20px; }
+      .milestone, .milestone:nth-child(even) { flex-direction: column; padding-left: 50px; }
+      .milestone-content { width: 100% !important; }
+      .milestone-spacer { display: none; }
+      .milestone-dot { left: 20px !important; }
+      .summary-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>📅 Calendario de Hitos</h1>
+    <p class="subtitle">Roadmap de desarrollo — 3 desarrolladores + IA — Sprints de 1 semana</p>
+  </div>
+
+
+  <!-- ═══ TIMELINE VISUAL ═══ -->
+  <div class="timeline">
+
+    <!-- ══ HITO 1 ══ -->
+    <div class="milestone phase-cyan">
+      <div class="milestone-content">
+        <div class="ms-header">
+          <div class="ms-icon">📐</div>
+          <div>
+            <div class="ms-sprint">Semana 1</div>
+            <div class="ms-title">Setup de Infraestructura + Ingesta de Datos</div>
+          </div>
+        </div>
+        <div class="ms-dates">📆 30 Mar — 04 Abr 2026</div>
+        <div class="ms-body">
+          <ul>
+            <li>Despliegue del cluster Apache Flink y Redpanda (Docker)</li>
+            <li>Definicion de la arquitectura y esquema de datos</li>
+            <li>Desarrollo del poller de OpenSky Network</li>
+            <li>Prototipo del frontend aprobado</li>
+          </ul>
+          <strong>Entregable:</strong> Infraestructura operativa con datos fluyendo en Kafka
+        </div>
+      </div>
+      <div class="milestone-spacer">
+        <div class="milestone-dot" style="border-color: var(--cyan); background: var(--cyan);"></div>
+      </div>
+      <div style="width:45%"></div>
+    </div>
+
+    <!-- ══ HITO 2 ══ -->
+    <div class="milestone phase-red">
+      <div style="width:45%"></div>
+      <div class="milestone-spacer">
+        <div class="milestone-dot" style="border-color: var(--red); background: var(--red);"></div>
+      </div>
+      <div class="milestone-content">
+        <div class="ms-header">
+          <div class="ms-icon">⚡</div>
+          <div>
+            <div class="ms-sprint">Semana 2</div>
+            <div class="ms-title">Procesamiento en Tiempo Real (Apache Flink)</div>
+          </div>
+        </div>
+        <div class="ms-dates">📆 06 Abr — 11 Abr 2026</div>
+        <div class="ms-body">
+          <ul>
+            <li>Job de deteccion de anomalias verticales (altitud)</li>
+            <li>Job de alertas por alta densidad (celdas H3)</li>
+            <li>Job de deteccion de zonas muertas (indice H3)</li>
+            <li>Flink CEP: patrones complejos encadenados</li>
+            <li>Definicion formal del schema JSON/Avro</li>
+          </ul>
+          <strong>Entregable:</strong> 4 jobs publicando alertas tipadas en Kafka
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ HITO 3 ══ -->
+    <div class="milestone phase-green">
+      <div class="milestone-content">
+        <div class="ms-header">
+          <div class="ms-icon">🚀</div>
+          <div>
+            <div class="ms-sprint">Semana 3</div>
+            <div class="ms-title">Backend API + Frontend Interactivo</div>
+          </div>
+        </div>
+        <div class="ms-dates">📆 13 Abr — 18 Abr 2026</div>
+        <div class="ms-body">
+          <ul>
+            <li>Kafka consumer asincrono con FastAPI</li>
+            <li>Endpoints REST y WebSocket para alertas</li>
+            <li>Mapa interactivo con Leaflet.js (tiles oscuros)</li>
+            <li>Sidebar de alertas con filtros por tipo y severidad</li>
+            <li>Tests unitarios de la API</li>
+          </ul>
+          <strong>Entregable:</strong> Backend API + Dashboard frontend independientes
+        </div>
+      </div>
+      <div class="milestone-spacer">
+        <div class="milestone-dot" style="border-color: var(--green); background: var(--green);"></div>
+      </div>
+      <div style="width:45%"></div>
+    </div>
+
+    <!-- ══ HITO 4 ══ -->
+    <div class="milestone phase-purple">
+      <div style="width:45%"></div>
+      <div class="milestone-spacer">
+        <div class="milestone-dot" style="border-color: var(--purple); background: var(--purple);"></div>
+      </div>
+      <div class="milestone-content">
+        <div class="ms-header">
+          <div class="ms-icon">🔗</div>
+          <div>
+            <div class="ms-sprint">Semana 4 — Fase 1</div>
+            <div class="ms-title">Integracion End-to-End</div>
+          </div>
+        </div>
+        <div class="ms-dates">📆 20 Abr — 21 Abr 2026</div>
+        <div class="ms-body">
+          <ul>
+            <li>Conexion del frontend al WebSocket del backend</li>
+            <li>Verificacion del flujo completo de datos</li>
+            <li>Resolucion de incidencias de integracion</li>
+          </ul>
+          <strong>Entregable:</strong> Sistema E2E funcionando en Docker
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ HITO 5 ══ -->
+    <div class="milestone phase-blue">
+      <div class="milestone-content">
+        <div class="ms-header">
+          <div class="ms-icon">🧪</div>
+          <div>
+            <div class="ms-sprint">Semana 4 — Fase 2</div>
+            <div class="ms-title">QA + Testing Final</div>
+          </div>
+        </div>
+        <div class="ms-dates">📆 22 Abr — 23 Abr 2026</div>
+        <div class="ms-body">
+          <ul>
+            <li>Tests E2E automatizados</li>
+            <li>Pruebas de carga y tolerancia a fallos</li>
+            <li>Validacion de todos los tipos de alerta en el mapa</li>
+          </ul>
+          <strong>Entregable:</strong> Informe de calidad + video demostrativo
+        </div>
+      </div>
+      <div class="milestone-spacer">
+        <div class="milestone-dot" style="border-color: var(--blue); background: var(--blue);"></div>
+      </div>
+      <div style="width:45%"></div>
+    </div>
+
+    <!-- ══ HITO 6 — FINAL ══ -->
+    <div class="milestone phase-yellow">
+      <div style="width:45%"></div>
+      <div class="milestone-spacer">
+        <div class="milestone-dot" style="border-color: var(--yellow); background: var(--yellow);"></div>
+      </div>
+      <div class="milestone-content">
+        <div class="ms-header">
+          <div class="ms-icon">🏁</div>
+          <div>
+            <div class="ms-sprint">Hito Final</div>
+            <div class="ms-title">Entrega + Presentacion</div>
+          </div>
+        </div>
+        <div class="ms-dates">📆 24 Abr 2026</div>
+        <div class="ms-body">
+          <ul>
+            <li>Presentacion del sistema completo en funcionamiento</li>
+            <li>Entrega de documentacion tecnica</li>
+            <li>Repositorio con despliegue automatizado (docker-compose)</li>
+          </ul>
+          <strong>Entregable:</strong> Sistema desplegable + documentacion completa
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /timeline -->
+
+  <!-- ═══ SUMMARY BAR ═══ -->
+  <div class="summary-bar">
+    <div class="summary-card">
+      <div class="summary-value" style="color: var(--cyan);">4</div>
+      <div class="summary-label">Semanas</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value" style="color: var(--green);">6</div>
+      <div class="summary-label">Hitos</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value" style="color: var(--orange);">5</div>
+      <div class="summary-label">Capas</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value" style="color: var(--purple);">24 Abr</div>
+      <div class="summary-label">Fecha de entrega</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    Calendario de Hitos — Sistema de Deteccion de Anomalias de Vuelo — v2.0 — 2026
+  </div>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      securityLevel: 'loose',
+      gantt: {
+        useMaxWidth: true,
+        barHeight: 24,
+        barGap: 6,
+        topPadding: 30,
+        sidePadding: 60,
+        fontSize: 11,
+        numberSectionStyles: 6
+      }
+    });
+  </script>
+</body>
+</html>
