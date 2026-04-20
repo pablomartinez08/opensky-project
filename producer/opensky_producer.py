@@ -9,6 +9,12 @@ KAFKA_TOPIC = "flight_data"
 # Apuntamos al puerto de Kafka externo al docker (KRaft listener)
 KAFKA_SERVER = "localhost:9094"
 
+# ════════════════════════════════════════════════════════════════
+# 🔑 CREDENCIALES DE OPENSKY (Mete aquí las tuyas para evitar el error 429)
+# ════════════════════════════════════════════════════════════════
+OPENSKY_USERNAME = "PON_AQUI_TU_USUARIO"
+OPENSKY_PASSWORD = "PON_AQUI_TU_PASSWORD"
+
 def main():
     print(f"Conectando a Kafka en {KAFKA_SERVER}...")
     producer = KafkaProducer(
@@ -22,7 +28,12 @@ def main():
             # Reducimos los datos usando un bounding box (Europa aprox) para evitar sobrecargar Flink en la demo
             # lamin, lomin, lamax, lomax
             url = f"{OPENSKY_URL}?lamin=35&lomin=-10&lamax=60&lomax=30"
-            response = requests.get(url, timeout=10)
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            
+            if OPENSKY_USERNAME != "PON_AQUI_TU_USUARIO" and OPENSKY_PASSWORD != "PON_AQUI_TU_PASSWORD":
+                response = requests.get(url, headers=headers, auth=(OPENSKY_USERNAME, OPENSKY_PASSWORD), timeout=10)
+            else:
+                response = requests.get(url, headers=headers, timeout=10)
             
             if response.status_code == 200:
                 data = response.json()
@@ -57,9 +68,9 @@ def main():
         except Exception as e:
             print(f"Error de conexión: {e}")
             
-        # La API pública de OpenSky tiene un rate limit estricto (1 request cada 10s para anónimos)
-        print("Esperando 10 segundos para la siguiente petición...")
-        time.sleep(10)
+        # La API pública de OpenSky suele tirar 429 si detecta bots. 15s es más seguro.
+        print("Esperando 15 segundos para la siguiente petición...")
+        time.sleep(15)
 
 if __name__ == "__main__":
     main()
