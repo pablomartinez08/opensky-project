@@ -1,7 +1,11 @@
+import os
 import json
 import time
 import requests
+from dotenv import load_dotenv
 from kafka import KafkaProducer
+
+load_dotenv()
 
 # OpenSky API URL
 OPENSKY_URL = "https://opensky-network.org/api/states/all"
@@ -10,10 +14,10 @@ KAFKA_TOPIC = "flight_data"
 KAFKA_SERVER = "localhost:9094"
 
 # ════════════════════════════════════════════════════════════════
-# 🔑 CREDENCIALES DE OPENSKY (Mete aquí las tuyas para evitar el error 429)
+# 🔑 CREDENCIALES DE OPENSKY LOCALES (cargadas desde un archivo .env)
 # ════════════════════════════════════════════════════════════════
-OPENSKY_USERNAME = "PON_AQUI_TU_USUARIO"
-OPENSKY_PASSWORD = "PON_AQUI_TU_PASSWORD"
+OPENSKY_USERNAME = os.getenv("OPENSKY_USERNAME")
+OPENSKY_PASSWORD = os.getenv("OPENSKY_PASSWORD")
 
 def main():
     print(f"Conectando a Kafka en {KAFKA_SERVER}...")
@@ -25,12 +29,11 @@ def main():
 
     while True:
         try:
-            # Reducimos los datos usando un bounding box (Europa aprox) para evitar sobrecargar Flink en la demo
-            # lamin, lomin, lamax, lomax
-            url = f"{OPENSKY_URL}?lamin=35&lomin=-10&lamax=60&lomax=30"
+            # Reducimos los datos a la Península Ibérica para no saturar al servidor gratis
+            url = f"{OPENSKY_URL}?lamin=35.0&lomin=-10.0&lamax=44.0&lomax=5.0"
             headers = {'User-Agent': 'Mozilla/5.0'}
             
-            if OPENSKY_USERNAME != "PON_AQUI_TU_USUARIO" and OPENSKY_PASSWORD != "PON_AQUI_TU_PASSWORD":
+            if OPENSKY_USERNAME and OPENSKY_PASSWORD:
                 response = requests.get(url, headers=headers, auth=(OPENSKY_USERNAME, OPENSKY_PASSWORD), timeout=10)
             else:
                 response = requests.get(url, headers=headers, timeout=10)
