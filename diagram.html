@@ -8,11 +8,7 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       background: #0d1117;
@@ -48,43 +44,17 @@
       border-radius: 16px;
       padding: 40px;
       width: 95%;
-      max-width: 1000px;
+      max-width: 1100px;
       overflow-x: auto;
       box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
     }
 
-    .mermaid {
-      display: flex;
-      justify-content: center;
-    }
-
-    /* Overrides originales */
-    .mermaid .node rect,
-    .mermaid .node polygon {
-      rx: 8;
-      ry: 8;
-    }
-
-    .mermaid .edgeLabel {
-      font-size: 11px !important;
-      font-family: 'Inter', sans-serif !important;
-    }
-
-    .mermaid .nodeLabel {
-      font-family: 'Inter', sans-serif !important;
-      font-weight: 600 !important;
-    }
-
-    .mermaid .cluster rect {
-      rx: 12 !important;
-      ry: 12 !important;
-    }
-
-    .mermaid .cluster-label .nodeLabel {
-      font-size: 13px !important;
-      font-weight: 700 !important;
-      letter-spacing: 0.5px;
-    }
+    .mermaid { display: flex; justify-content: center; }
+    .mermaid .node rect, .mermaid .node polygon { rx: 8; ry: 8; }
+    .mermaid .edgeLabel { font-size: 11px !important; font-family: 'Inter', sans-serif !important; }
+    .mermaid .nodeLabel { font-family: 'Inter', sans-serif !important; font-weight: 600 !important; }
+    .mermaid .cluster rect { rx: 12 !important; ry: 12 !important; }
+    .mermaid .cluster-label .nodeLabel { font-size: 13px !important; font-weight: 700 !important; letter-spacing: 0.5px; }
 
     .legend {
       margin-top: 30px;
@@ -94,29 +64,17 @@
       justify-content: center;
     }
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.75rem;
-      color: #8b949e;
-    }
-
-    .legend-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-    }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #8b949e; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
   </style>
 </head>
 
 <body>
 
   <h1>🛫 Arquitectura: Sistema de Detección de Anomalías de Vuelo</h1>
-  <p class="subtitle">Apache Flink · Kafka · FastAPI · WebSocket · Leaflet.js</p>
+  <p class="subtitle">Apache Flink · Kafka · Neo4j · FastAPI · WebSocket · Leaflet.js</p>
 
   <div id="diagram-container">
-    <!-- SOLO cambia esta parte -->
     <pre class="mermaid">
 %%{init: {
   'theme': 'dark',
@@ -146,8 +104,8 @@ flowchart TB
     direction LR
     D["📥 Flink KafkaSource"]
     E["🔑 keyBy·icao24"]
-    F["📡 keyBy·celdaH3 (alta densidad)"]
-    G["🗺️ keyBy·celdaH3 (baja densidad)"]
+    F["📡 keyBy·celdaH3 alta densidad"]
+    G["🗺️ keyBy·celdaH3 baja densidad"]
     H["🧩 Flink CEP"]
 
     D --> E
@@ -155,7 +113,7 @@ flowchart TB
     D --> G
   end
 
-  subgraph CAPA3["📢 CAPA 3 — ALERTAS (KAFKA)"]
+  subgraph CAPA3["📢 CAPA 3 — ALERTAS · KAFKA"]
     direction LR
     I1["📨 vertical"]
     I2["📨 densidad"]
@@ -166,13 +124,26 @@ flowchart TB
     S["📐 JSON / Avro"]
   end
 
-  subgraph CAPA4["🚀 BACKEND"]
+  subgraph CAPA_NEO["🕸️ CAPA 3C — PERSISTENCIA DE GRAFOS · NEO4J"]
+    direction LR
+    N1["✈️ Nodo: Vuelo"]
+    N2["🚨 Nodo: Alerta"]
+    N3["📍 Nodo: Zona H3"]
+    N1 -- "TIENE_ALERTA" --> N2
+    N1 -- "VUELA_SOBRE" --> N3
+    N2 -- "OCURRE_EN" --> N3
+  end
+
+  subgraph CAPA4["🚀 BACKEND · FASTAPI"]
     direction LR
     J["🔄 Kafka Consumer"] --> K["🔌 WebSocket"]
+    J --> N4["💾 Neo4j Driver"]
+    N4 --> N5["📊 API REST Consultas"]
   end
 
   subgraph CAPA5["🖥️ FRONTEND"]
-    L["🗺️ Mapa"]
+    L["🗺️ Mapa Leaflet"]
+    L2["📈 Panel Historial"]
   end
 
   %% Flujo vertical principal
@@ -181,6 +152,8 @@ flowchart TB
   CAPA3 --> CAPA3B
   CAPA3B --> CAPA4
   CAPA4 --> CAPA5
+  CAPA4 --> CAPA_NEO
+  CAPA_NEO --> CAPA4
 
   %% Conexiones internas
   E --> I1
@@ -188,7 +161,7 @@ flowchart TB
   G --> I2
   H --> I3
 
-  %% Estilos (igual que antes)
+  %% Estilos
   style A fill:#0d4a6b,stroke:#22d3ee,stroke-width:2px,color:#e0f2fe
   style B fill:#4a3728,stroke:#facc15,stroke-width:2px,color:#fef9c3
   style C fill:#4a2c17,stroke:#f97316,stroke-width:2px,color:#ffedd5
@@ -203,36 +176,32 @@ flowchart TB
   style S fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#dbeafe
   style J fill:#14392a,stroke:#34d399,stroke-width:2px,color:#d1fae5
   style K fill:#14392a,stroke:#34d399,stroke-width:2px,color:#d1fae5
+  style N4 fill:#14392a,stroke:#34d399,stroke-width:2px,color:#d1fae5
+  style N5 fill:#14392a,stroke:#34d399,stroke-width:2px,color:#d1fae5
   style L fill:#2e1a4a,stroke:#a78bfa,stroke-width:2px,color:#ede9fe
+  style L2 fill:#2e1a4a,stroke:#a78bfa,stroke-width:2px,color:#ede9fe
+  style N1 fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#d1fae5
+  style N2 fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#d1fae5
+  style N3 fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#d1fae5
 
   style CAPA1 fill:#0c1a2e,stroke:#22d3ee,stroke-width:2px,color:#22d3ee
   style CAPA2 fill:#1a0a0a,stroke:#f43f5e,stroke-width:2px,color:#f43f5e
   style CAPA3 fill:#1a1005,stroke:#f97316,stroke-width:2px,color:#f97316
   style CAPA3B fill:#111827,stroke:#60a5fa,stroke-width:2px,color:#60a5fa
+  style CAPA_NEO fill:#022c22,stroke:#10b981,stroke-width:2px,color:#10b981
   style CAPA4 fill:#0a1a14,stroke:#34d399,stroke-width:2px,color:#34d399
   style CAPA5 fill:#150d26,stroke:#a78bfa,stroke-width:2px,color:#a78bfa
 </pre>
   </div>
 
   <div class="legend">
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#22d3ee;"></div> Ingesta
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#f43f5e;"></div> Flink
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#f97316;"></div> Kafka
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#60a5fa;"></div> Schema
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#34d399;"></div> Backend
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#a78bfa;"></div> Frontend
-    </div>
+    <div class="legend-item"><div class="legend-dot" style="background:#22d3ee;"></div> Ingesta</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f43f5e;"></div> Flink</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f97316;"></div> Kafka</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa;"></div> Schema</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981;"></div> Neo4j</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34d399;"></div> Backend</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa;"></div> Frontend</div>
   </div>
 
   <script type="module">
