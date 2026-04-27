@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Presentación del Proyecto Flink</title>
-  
+
   <!-- Estilos base de Reveal.js -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.css">
-  
+
   <!-- Tema personalizado -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
@@ -32,7 +33,10 @@
       color: var(--main-color);
     }
 
-    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+    .reveal h1,
+    .reveal h2,
+    .reveal h3,
+    .reveal h4 {
       font-family: 'Inter', sans-serif;
       font-weight: 800;
       text-transform: none;
@@ -40,8 +44,15 @@
       margin-bottom: 20px;
     }
 
-    .reveal h1 { font-size: 3.5em; text-shadow: 0 0 40px rgba(34,211,238,0.3); }
-    .reveal h2 { font-size: 2.5em; text-shadow: 0 0 30px rgba(168,85,247,0.3); }
+    .reveal h1 {
+      font-size: 3.5em;
+      text-shadow: 0 0 40px rgba(34, 211, 238, 0.3);
+    }
+
+    .reveal h2 {
+      font-size: 2.5em;
+      text-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+    }
 
     .text-gradient {
       background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
@@ -104,7 +115,7 @@
 
     .glass-box:hover {
       transform: translateY(-10px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
       border-color: var(--accent-cyan);
     }
 
@@ -137,23 +148,38 @@
       vertical-align: middle;
     }
 
-    .status-done { background: rgba(52,211,153,0.15); color: var(--accent-green); border: 1px solid rgba(52,211,153,0.4); }
-    .status-progress { background: rgba(34,211,238,0.15); color: var(--accent-cyan); border: 1px solid rgba(34,211,238,0.4); }
-    .status-todo { background: rgba(139,148,158,0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.4); }
+    .status-done {
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+    }
+
+    .status-progress {
+      background: rgba(34, 211, 238, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(34, 211, 238, 0.4);
+    }
+
+    .status-todo {
+      background: rgba(139, 148, 158, 0.15);
+      color: #8b949e;
+      border: 1px solid rgba(139, 148, 158, 0.4);
+    }
 
     .glow-img {
       border-radius: 20px;
-      box-shadow: 0 0 40px rgba(34,211,238,0.2);
-      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 0 40px rgba(34, 211, 238, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       max-height: 50vh !important;
     }
   </style>
 </head>
+
 <body>
 
   <div class="reveal">
     <div class="slides">
-      
+
       <!-- Portada -->
       <section data-auto-animate>
         <span class="icon-large" style="font-size: 4em; filter: drop-shadow(0 0 20px #22d3ee);">✈️</span>
@@ -165,7 +191,8 @@
       <section data-auto-animate>
         <h2>¿Qué es <span class="text-gradient-orange">Apache Flink</span>?</h2>
         <p style="text-align: left; max-width: 800px; margin: 0 auto; margin-bottom: 30px;">
-          Apache Flink es un motor y framework de procesamiento distribuido para cálculos con estado sobre flujos de datos ilimitados (streams) y limitados (batches).
+          Apache Flink es un motor y framework de procesamiento distribuido para cálculos con estado sobre flujos de
+          datos ilimitados (streams) y limitados (batches).
         </p>
         <div class="box-container" style="grid-template-columns: 1fr 1fr;">
           <div class="glass-box">
@@ -174,7 +201,8 @@
           </div>
           <div class="glass-box" style="border-color: rgba(168,85,247,0.3);">
             <h3>🧠 Stateful Processing</h3>
-            <p>Mantiene el "estado" de las operaciones (ej. historial reciente del vuelo) con alta tolerancia a fallos.</p>
+            <p>Mantiene el "estado" de las operaciones (ej. historial reciente del vuelo) con alta tolerancia a fallos.
+            </p>
           </div>
           <div class="glass-box" style="border-color: rgba(52,211,153,0.3);">
             <h3>🔍 Event Time Semantics</h3>
@@ -191,32 +219,37 @@
       <section>
         <h2>¿De qué va nuestro <span class="text-gradient">Proyecto</span>?</h2>
         <p>Una herramienta de <strong>observabilidad global</strong> para el tráfico aéreo.</p>
-        
+
         <div class="glass-box" style="margin-top: 40px;">
           <h3>Concepto</h3>
-          <p>Queremos tener una visión analítica global para detectar patrones inusuales de forma automatizada en el trafico aereo. Nuestro sistema ingiere datos abiertos de <strong>OpenSky Network</strong> mediante transpondedores ADS-B para hallar situaciones de riesgo sin intervención humana.</p>
+          <p>Queremos tener una visión analítica global para detectar patrones inusuales de forma automatizada en el
+            trafico aereo. Nuestro sistema ingiere datos abiertos de <strong>OpenSky Network</strong> mediante
+            transpondedores ADS-B para hallar situaciones de riesgo sin intervención humana.</p>
         </div>
       </section>
 
       <!-- Casos de Uso / Patrones a detectar -->
       <section>
         <h2>¿Qué anomalías detectamos?</h2>
-        
+
         <div class="box-container" style="grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
           <div class="glass-box">
             <span class="icon-large">📉</span>
             <h3 style="font-size: 1.2em;">Altitud Brusca</h3>
-            <p style="font-size: 0.85em;">Descensos o ascensos anómalos en ventanas de 30 a 90s sugerentes de emergencias o turbulencias.</p>
+            <p style="font-size: 0.85em;">Descensos o ascensos anómalos en ventanas de 30 a 90s sugerentes de
+              emergencias o turbulencias.</p>
           </div>
           <div class="glass-box">
             <span class="icon-large">🚨</span>
             <h3 style="font-size: 1.2em;">Alta Densidad</h3>
-            <p style="font-size: 0.85em;">Agrupamiento inusual de alertas en zonas indexadas con H3, apuntando a problemas meteorológicos o de congestión.</p>
+            <p style="font-size: 0.85em;">Agrupamiento inusual de alertas en zonas indexadas con H3, apuntando a
+              problemas meteorológicos o de congestión.</p>
           </div>
           <div class="glass-box">
             <span class="icon-large">🕳️</span>
             <h3 style="font-size: 1.2em;">Zonas Muertas</h3>
-            <p style="font-size: 0.85em;">Ausencia prolongada de aeronaves en celdas geográficas (H3) de tránsito regular histórico.</p>
+            <p style="font-size: 0.85em;">Ausencia prolongada de aeronaves en celdas geográficas (H3) de tránsito
+              regular histórico.</p>
           </div>
         </div>
       </section>
@@ -224,34 +257,39 @@
       <!-- Arquitectura -->
       <section>
         <h2>Arquitectura del Sistema</h2>
-        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
-          
+        <div
+          style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+
           <div style="text-align: center;">
             <span class="icon-large">📡</span>
             <p style="font-size: 0.8em; margin:0;">OpenSky API</p>
           </div>
-          
+
           <span style="color: var(--accent-cyan);">➔</span>
-          
-          <div style="text-align: center; border: 1px solid var(--accent-cyan); padding: 15px; border-radius: 10px; background: rgba(34,211,238,0.1);">
+
+          <div
+            style="text-align: center; border: 1px solid var(--accent-cyan); padding: 15px; border-radius: 10px; background: rgba(34,211,238,0.1);">
             <p style="font-size: 0.8em; margin:0; font-weight: bold; color: white;">Poller (Python)</p>
           </div>
-          
+
           <span style="color: var(--accent-cyan);">➔</span>
-          
-          <div style="text-align: center; border: 1px solid var(--accent-orange); padding: 15px; border-radius: 10px; background: rgba(249,115,22,0.1);">
+
+          <div
+            style="text-align: center; border: 1px solid var(--accent-orange); padding: 15px; border-radius: 10px; background: rgba(249,115,22,0.1);">
             <p style="font-size: 0.8em; margin:0; font-weight: bold; color: white;">Kafka</p>
           </div>
-          
+
           <span style="color: var(--accent-cyan);">➔</span>
-          
-          <div style="text-align: center; border: 1px solid var(--accent-purple); padding: 15px; border-radius: 10px; background: rgba(168,85,247,0.1);">
+
+          <div
+            style="text-align: center; border: 1px solid var(--accent-purple); padding: 15px; border-radius: 10px; background: rgba(168,85,247,0.1);">
             <p style="font-size: 0.8em; margin:0; font-weight: bold; color: white;">Apache Flink</p>
           </div>
-          
+
           <span style="color: var(--accent-cyan);">➔</span>
-          
-          <div style="text-align: center; border: 1px solid var(--accent-green); padding: 15px; border-radius: 10px; background: rgba(52,211,153,0.1);">
+
+          <div
+            style="text-align: center; border: 1px solid var(--accent-green); padding: 15px; border-radius: 10px; background: rgba(52,211,153,0.1);">
             <p style="font-size: 0.8em; margin:0; font-weight: bold; color: white;">FastAPI + WSS</p>
           </div>
 
@@ -270,11 +308,15 @@
         <h2>¿Qué tenemos <span class="text-gradient-orange">hecho</span>?</h2>
         <ul style="margin-top: 30px; display: inline-block; text-align: left; max-width: 800px;">
           <li>Fundamentos y Contrato de Diseño definidos <span class="status-badge status-done">Completado</span></li>
-          <li>Mockup interactivo del Dashboard Analítico con Leaflet <span class="status-badge status-done">Completado</span></li>
-          <li>Documentación de API Endpoints y Diagramas de Flujo <span class="status-badge status-done">Completado</span></li>
-          <li>Infraestructura base Docker (Kafka, Zookeeper, Flink) <span class="status-badge status-progress">En Progreso</span></li>
+          <li>Mockup interactivo del Dashboard Analítico con Leaflet <span
+              class="status-badge status-done">Completado</span></li>
+          <li>Documentación de API Endpoints y Diagramas de Flujo <span
+              class="status-badge status-done">Completado</span></li>
+          <li>Infraestructura base Docker (Kafka, Zookeeper, Flink) <span class="status-badge status-progress">En
+              Progreso</span></li>
           <li>Poller de ingesta de datos a Kafka <span class="status-badge status-progress">En Progreso</span></li>
-          <li>Desarrollo de Jobs CEP en Apache Flink <span class="status-badge status-todo">Pendiente (Sprint 2)</span></li>
+          <li>Desarrollo de Jobs CEP en Apache Flink <span class="status-badge status-todo">Pendiente (Sprint 2)</span>
+          </li>
         </ul>
       </section>
 
@@ -282,29 +324,39 @@
       <section>
         <h2>Un Vistazo al Dashboard</h2>
         <p>Mockup funcional del frontend de monitoreo de incidentes.</p>
-        <div style="display: flex; justify-content: center; align-items: center; height: 50vh; background: #161b22; border: 1px solid #30363d; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div
+          style="display: flex; justify-content: center; align-items: center; height: 50vh; background: #161b22; border: 1px solid #30363d; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
           <!-- Placeholder de imagen estilo mock -->
           <div style="width: 100%; height: 100%; position: relative; overflow: hidden; border-radius: 20px;">
-              <div style="position: absolute; top:0; left:0; right: 0; padding: 10px 20px; background: #0d1117; display: flex; justify-content: space-between; border-bottom: 1px solid #30363d;">
-                 <span style="color:var(--accent-cyan); font-weight: bold;">[OpenSky] Análisis Táctico</span>
-                 <div>
-                    <span style="margin-right: 15px; font-size: 0.8em; color: var(--accent-red);">● 12 Anomalías Verticales</span>
-                    <span style="font-size: 0.8em; color: var(--accent-orange);">● 3 Zonas Alta Densidad</span>
-                 </div>
+            <div
+              style="position: absolute; top:0; left:0; right: 0; padding: 10px 20px; background: #0d1117; display: flex; justify-content: space-between; border-bottom: 1px solid #30363d;">
+              <span style="color:var(--accent-cyan); font-weight: bold;">[OpenSky] Análisis Táctico</span>
+              <div>
+                <span style="margin-right: 15px; font-size: 0.8em; color: var(--accent-red);">● 12 Anomalías
+                  Verticales</span>
+                <span style="font-size: 0.8em; color: var(--accent-orange);">● 3 Zonas Alta Densidad</span>
               </div>
-              <div style="position: absolute; top:45px; bottom:0; left:0; width: 300px; background: #161b22; border-right: 1px solid #30363d; padding: 20px;">
-                 <div style="padding: 10px; background: rgba(244,63,94,0.1); border-left: 3px solid var(--accent-red); margin-bottom: 15px;">
-                    <strong style="color:var(--accent-red); font-size: 0.9em;">ALERTA CRÍTICA</strong><br>
-                    <span style="font-size: 0.8em; color: #8b949e;">Vuelo IBE3422 - Caída brusca de 5000ft en 30s.</span>
-                 </div>
-                 <div style="padding: 10px; background: rgba(249,115,22,0.1); border-left: 3px solid var(--accent-orange);">
-                    <strong style="color:var(--accent-orange); font-size: 0.9em;">ALTA DENSIDAD</strong><br>
-                    <span style="font-size: 0.8em; color: #8b949e;">Celda H3 8a283082a67 - 15 aeronaves con anomalías cercanas (MAD).</span>
-                 </div>
+            </div>
+            <div
+              style="position: absolute; top:45px; bottom:0; left:0; width: 300px; background: #161b22; border-right: 1px solid #30363d; padding: 20px;">
+              <div
+                style="padding: 10px; background: rgba(244,63,94,0.1); border-left: 3px solid var(--accent-red); margin-bottom: 15px;">
+                <strong style="color:var(--accent-red); font-size: 0.9em;">ALERTA CRÍTICA</strong><br>
+                <span style="font-size: 0.8em; color: #8b949e;">Vuelo IBE3422 - Caída brusca de 5000ft en 30s.</span>
               </div>
-              <div style="position: absolute; top:45px; bottom:0; left:300px; right: 0; background: url('https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/6/30/24.png') center/cover;">
-                  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: var(--accent-red); border-radius: 50%; box-shadow: 0 0 20px var(--accent-red);"></div>
+              <div
+                style="padding: 10px; background: rgba(249,115,22,0.1); border-left: 3px solid var(--accent-orange);">
+                <strong style="color:var(--accent-orange); font-size: 0.9em;">ALTA DENSIDAD</strong><br>
+                <span style="font-size: 0.8em; color: #8b949e;">Celda H3 8a283082a67 - 15 aeronaves con anomalías
+                  cercanas (MAD).</span>
               </div>
+            </div>
+            <div
+              style="position: absolute; top:45px; bottom:0; left:300px; right: 0; background: url('https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/6/30/24.png') center/cover;">
+              <div
+                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: var(--accent-red); border-radius: 50%; box-shadow: 0 0 20px var(--accent-red);">
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -331,4 +383,5 @@
     });
   </script>
 </body>
+
 </html>

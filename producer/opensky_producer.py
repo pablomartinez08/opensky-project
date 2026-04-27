@@ -29,8 +29,8 @@ def main():
 
     while True:
         try:
-            # Reducimos los datos a la Península Ibérica para no saturar al servidor gratis
-            url = f"{OPENSKY_URL}?lamin=35.0&lomin=-10.0&lamax=44.0&lomax=5.0"
+            # Sin bounding box: datos de TODO el mundo (requiere cuenta autenticada)
+            url = OPENSKY_URL
             headers = {'User-Agent': 'Mozilla/5.0'}
             
             if OPENSKY_USERNAME and OPENSKY_PASSWORD:
