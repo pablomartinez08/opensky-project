@@ -27,16 +27,22 @@ from pyflink.datastream.state import ValueStateDescriptor
 
 
 # ══════════════════════════════════════════════════════════════
-# UMBRALES DE DETECCIÓN (en metros de delta entre polls)
+# UMBRALES DE DETECCIÓN (calibrados para tráfico mundial)
 # ══════════════════════════════════════════════════════════════
-#   La API de OpenSky se consulta cada ~10 segundos.
-#   Si un avión pierde 500m en 10s → ~50 m/s de descenso
-#   (normal comercial: 5-15 m/s; emergencia: >30 m/s)
+#   Con ~10.000 vuelos globales y polls cada ~15s:
+#   - Descenso normal de aterrizaje: 5-15 m/s → 75-225m entre polls
+#   - Descenso agresivo (go-around): 15-25 m/s → 225-375m
+#   - Emergencia REAL: >30 m/s → >450m entre polls
+#   Usamos umbrales altos para filtrar solo eventos excepcionales.
 # ══════════════════════════════════════════════════════════════
-UMBRAL_CRITICA = 500    # |Δ alt| >= 500m → severidad "critica"
-UMBRAL_ALTA    = 250    # |Δ alt| >= 250m → severidad "alta"
-UMBRAL_MEDIA   = 100    # |Δ alt| >= 100m → severidad "media"
-UMBRAL_BAJA    = 50     # |Δ alt| >=  50m → severidad "baja"
+UMBRAL_CRITICA = 4000   # |Δ alt| >= 4000m → severidad "critica" (emergencia real)
+UMBRAL_ALTA    = 2500   # |Δ alt| >= 2500m → severidad "alta"    (maniobra extrema)
+UMBRAL_MEDIA   = 1500   # |Δ alt| >= 1500m → severidad "media"   (evento significativo)
+UMBRAL_BAJA    = 800    # |Δ alt| >=  800m → severidad "baja"    (cambio anómalo)
+
+# Filtro adicional: velocidad vertical instantánea (m/s) de OpenSky
+# Si |vertical_rate| < este umbral, ignoramos el delta (probablemente gap de datos)
+UMBRAL_VERTICAL_RATE = 20  # m/s — normal comercial: 5-15 m/s
 
 
 # ══════════════════════════════════════════════════════════════
@@ -178,10 +184,24 @@ class VerticalAlertDetector(KeyedProcessFunction):
         # ── Calcular delta de altitud ──
         delta = altitude - prev_altitude
         abs_delta = abs(delta)
+
+        # ── Filtro por vertical_rate (segundo nivel de validación) ──
+        # Si OpenSky reporta una vertical_rate normal, el delta grande
+        # probablemente se debe a un gap de datos (poll perdido), no a
+        # una anomalía real. Solo alertamos si vertical_rate también es alto.
+        vertical_rate = flight.get("vertical_rate")
+        if vertical_rate is not None and abs(vertical_rate) < UMBRAL_VERTICAL_RATE:
+            # Tasa vertical normal → no es anomalía, solo actualizar estado
+            self.state.update({
+                "prev_altitude": altitude,
+                "alert_active": False
+            })
+            return
+
         severidad = self._calcular_severidad(abs_delta)
 
         if severidad:
-            # ═══ HAY ANOMALÍA ═══
+            # ═══ HAY ANOMALÍA CONFIRMADA ═══
             estado = "inicio" if not alert_was_active else "actualizacion"
             alert = self._construir_alerta(flight, prev_altitude, delta, severidad, estado)
 
@@ -194,22 +214,12 @@ class VerticalAlertDetector(KeyedProcessFunction):
 
         else:
             # ═══ NO HAY ANOMALÍA ═══
-            if alert_was_active:
-                # El vuelo se ha estabilizado → cerrar la alerta con estado="fin"
-                alert = self._construir_alerta(flight, prev_altitude, delta, "baja", "fin")
-
-                self.state.update({
-                    "prev_altitude": altitude,
-                    "alert_active": False
-                })
-
-                yield json.dumps(alert, ensure_ascii=False)
-            else:
-                # Vuelo normal, sin alerta previa → simplemente actualizar altitud
-                self.state.update({
-                    "prev_altitude": altitude,
-                    "alert_active": False
-                })
+            # Silencio: no emitimos alertas "fin" para reducir ruido.
+            # El frontend ya maneja la desaparición natural de alertas antiguas.
+            self.state.update({
+                "prev_altitude": altitude,
+                "alert_active": False
+            })
 
 
 # ══════════════════════════════════════════════════════════════
