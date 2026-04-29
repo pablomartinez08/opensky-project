@@ -3,8 +3,8 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.7.0
     ports:
-      - "9092:9092"    # para tu app Python / Opcional si usas 9094
-      - "9094:9094"    # Puerto externo recomendado
+      - "9092:9092" # para tu app Python / Opcional si usas 9094
+      - "9094:9094" # Puerto externo recomendado
     environment:
       # KRaft: Kafka gestiona su propio consenso (sin Zookeeper)
       KAFKA_NODE_ID: 1
@@ -71,12 +71,23 @@ services:
     networks:
       - flink-network
 
+  density-alert:
+    build: .
+    depends_on:
+      - kafka
+      - jobmanager
+      - taskmanager
+    volumes:
+      - ./flink_app:/opt/flink/flink_app
+    command: bash -lc "sleep 30 && /opt/flink/bin/flink run -d -m jobmanager:8081 -py /opt/flink/flink_app/density_alert.py; tail -f /dev/null"
+    networks:
+      - flink-network
   # ──── NEO4J (Persistencia de Grafos) ───────────────────────────
   neo4j:
     image: neo4j:5-community
     ports:
-      - "7474:7474"    # Neo4j Browser (interfaz web)
-      - "7687:7687"    # Protocolo Bolt (driver Python)
+      - "7474:7474" # Neo4j Browser (interfaz web)
+      - "7687:7687" # Protocolo Bolt (driver Python)
     environment:
       NEO4J_AUTH: neo4j/opensky_secret
     volumes:
