@@ -37,9 +37,10 @@ AUTO_OFFSET_RESET   = "earliest"            # Leer el topic desde el inicio para
 
 H3_RESOLUTION       = 4                     # Ajustable (4 = celdas de ~1700 km2)
 FLIGHT_EXPIRY_MS    = 120_000               # 2 minutos para considerar un vuelo "inactivo"
-SAMPLE_INTERVAL_MS  = 30_000                # Muestreo estadístico cada 30 segundos
-MIN_SAMPLES_WARMUP  = 10                    # Muestras mínimas antes de activar alertas
-THRESHOLD_SIGMA     = 3                     # Sensibilidad (Mean + 3 * StdDev)
+SAMPLE_INTERVAL_MS  = 5_000                 # Muestreo estadístico cada 5 segundos
+MIN_SAMPLES_WARMUP  = 3                     # Muestras mínimas (~15s de warmup)
+THRESHOLD_SIGMA     = 2.5                   # Sensibilidad (Mean + 2.5 * StdDev)
+MIN_THRESHOLD_BUFFER = 3                    # Margen mínimo sobre la media para evitar autoactivación
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("DensityAlert")
@@ -137,7 +138,11 @@ class HighDensityDetector(KeyedProcessFunction):
             return 999.0
         variance = stats["M2"] / (stats["n"] - 1)
         std = variance ** 0.5
-        return max(3.0, stats["mean"] + THRESHOLD_SIGMA * std)
+        dynamic = THRESHOLD_SIGMA * std
+        # Garantizar que el umbral siempre esté por encima de la media
+        # para que el baseline normal no se autoactive (ej: media=3, var=0 → threshold=6)
+        buffer = max(dynamic, MIN_THRESHOLD_BUFFER)
+        return stats["mean"] + buffer
 
     def process_element(self, flight: dict, ctx: KeyedProcessFunction.Context):
         h3_idx = ctx.get_current_key()
@@ -170,7 +175,7 @@ class HighDensityDetector(KeyedProcessFunction):
         stats = json.loads(stats_json) if stats_json else None
         threshold = self.compute_threshold(stats)
 
-        if active_count >= threshold:
+        if active_count > threshold:
             lat_centro, lng_centro = h3_index_to_geo(h3_idx)
             alert_json = {
                 "tipo_alerta": "alta_densidad",
@@ -212,6 +217,8 @@ class HighDensityDetector(KeyedProcessFunction):
         next_timer = timestamp + SAMPLE_INTERVAL_MS
         ctx.timer_service().register_processing_time_timer(next_timer)
         self.timer_state.update(next_timer)
+        
+        yield from []  # Necesario en PyFlink para que sea un generador
 
 
 # ═══════════════════════════════════════════════════════════════════

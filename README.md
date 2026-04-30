@@ -70,8 +70,6 @@ pip install -r requirements.txt
 
 - `python mock_anomaly_producer.py`
   - Envía datos de prueba al topic `flight_data`.
-- `python mock_density_producer.py`
-  - Envía muchos vuelos de prueba en la misma zona para generar una alerta de alta densidad.
 - `python opensky_producer.py`
   - Envía datos reales desde la API de OpenSky (requiere `.env` con `OPENSKY_USERNAME` y `OPENSKY_PASSWORD` si usas autenticación).
 
