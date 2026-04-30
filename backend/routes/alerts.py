@@ -1,20 +1,22 @@
 """
-Router de Alertas: REST endpoints para listar, filtrar y consultar Neo4j.
+Router de Alertas — Refactorizado SOLID (Principio D).
+
+Depende de abstracciones vía request.app.state, no de imports globales.
+Los endpoints REST consultan AlertStore y AlertRepository inyectados.
 """
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from models import FlightAlert, AlertListResponse
-from kafka_consumer import alertas_store, alertas_by_id
-from neo4j_client import get_alertas_por_vuelo, get_zonas_calientes, get_vuelos_reincidentes
 
 router = APIRouter(prefix="/api/v1")
 
 
 # ══════════════════════════════════════════════════════════════
-# REST — Alertas en memoria
+# REST — Alertas en memoria (vía AlertStore)
 # ══════════════════════════════════════════════════════════════
 @router.get("/alerts", response_model=AlertListResponse)
 async def list_alerts(
+    request: Request,
     tipo: Optional[str] = Query(None, description="Filtrar por tipo_alerta"),
     severidad: Optional[str] = Query(None, description="Filtrar por severidad"),
     estado: Optional[str] = Query(None, description="Filtrar por estado"),
@@ -22,17 +24,9 @@ async def list_alerts(
     offset: int = Query(0, ge=0),
 ):
     """Listar alertas activas con filtros y paginación."""
-    filtered = list(alertas_store)
-
-    if tipo:
-        filtered = [a for a in filtered if a.get("tipo_alerta") == tipo]
-    if severidad:
-        filtered = [a for a in filtered if a.get("severidad") == severidad]
-    if estado:
-        filtered = [a for a in filtered if a.get("estado") == estado]
-
-    total = len(filtered)
-    page = filtered[offset: offset + limit]
+    store = request.app.state.alert_store
+    page, total = store.list_alerts(tipo=tipo, severidad=severidad, estado=estado,
+                                     limit=limit, offset=offset)
 
     return AlertListResponse(
         total=total,
@@ -43,33 +37,37 @@ async def list_alerts(
 
 
 @router.get("/alerts/{alert_id}", response_model=FlightAlert)
-async def get_alert(alert_id: str):
+async def get_alert(request: Request, alert_id: str):
     """Detalle de una alerta por su UUID."""
-    alerta = alertas_by_id.get(alert_id)
+    store = request.app.state.alert_store
+    alerta = store.get_by_id(alert_id)
     if not alerta:
         raise HTTPException(status_code=404, detail="Alerta no encontrada")
     return FlightAlert(**alerta)
 
 
 # ══════════════════════════════════════════════════════════════
-# REST — Consultas Neo4j (Grafos)
+# REST — Consultas Neo4j (vía AlertRepository)
 # ══════════════════════════════════════════════════════════════
 @router.get("/neo4j/vuelo/{icao24}")
-async def neo4j_vuelo(icao24: str):
-    """Historial de alertas de un avión concreto desde Neo4j."""
-    alertas = get_alertas_por_vuelo(icao24)
+async def neo4j_vuelo(request: Request, icao24: str):
+    """Historial de alertas de un avión concreto desde el repositorio."""
+    repo = request.app.state.repository
+    alertas = repo.get_alerts_by_flight(icao24)
     return {"icao24": icao24, "total": len(alertas), "alertas": alertas}
 
 
 @router.get("/neo4j/zonas-calientes")
-async def neo4j_zonas(limit: int = Query(10, ge=1, le=50)):
+async def neo4j_zonas(request: Request, limit: int = Query(10, ge=1, le=50)):
     """Top zonas H3 con más alertas."""
-    zonas = get_zonas_calientes(limit)
+    repo = request.app.state.repository
+    zonas = repo.get_hot_zones(limit)
     return {"total": len(zonas), "zonas": zonas}
 
 
 @router.get("/neo4j/vuelos-reincidentes")
-async def neo4j_reincidentes(min_alertas: int = Query(3, ge=1)):
+async def neo4j_reincidentes(request: Request, min_alertas: int = Query(3, ge=1)):
     """Vuelos con más de N alertas en el grafo."""
-    vuelos = get_vuelos_reincidentes(min_alertas)
+    repo = request.app.state.repository
+    vuelos = repo.get_repeat_flights(min_alertas)
     return {"total": len(vuelos), "vuelos": vuelos}

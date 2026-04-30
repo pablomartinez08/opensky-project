@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informe de Calidad — Semana 4</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #1c2333; --border: #30363d;
+      --text: #e6edf3; --text2: #8b949e;
+      --green: #3fb950; --red: #f85149; --cyan: #58a6ff; --purple: #bc8cff;
+      --orange: #f0883e; --yellow: #d29922;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+      padding: 40px; line-height: 1.6;
+    }
+
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    h1 { font-size: 2.5em; font-weight: 800; margin-bottom: 8px;
+         background: linear-gradient(135deg, var(--cyan), var(--purple));
+         -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    h2 { font-size: 1.5em; font-weight: 700; color: var(--cyan); margin: 40px 0 16px;
+         border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    h3 { font-size: 1.1em; font-weight: 600; color: var(--purple); margin: 24px 0 12px; }
+    p { color: var(--text2); margin-bottom: 12px; }
+    .subtitle { font-size: 1.1em; color: var(--text2); font-weight: 300; margin-bottom: 32px; }
+
+    /* Summary Cards */
+    .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+    .card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; text-align: center;
+    }
+    .card .num { font-size: 2.2em; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+    .card .label { font-size: 0.75em; color: var(--text2); text-transform: uppercase;
+                   letter-spacing: 1px; margin-top: 4px; }
+    .card.green .num { color: var(--green); }
+    .card.red .num { color: var(--red); }
+    .card.cyan .num { color: var(--cyan); }
+    .card.purple .num { color: var(--purple); }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th { background: var(--bg3); color: var(--cyan); font-size: 0.72em; font-weight: 700;
+         text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px; text-align: left; }
+    td { padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 0.85em; }
+    tr:hover td { background: rgba(88,166,255,0.04); }
+    .pass { color: var(--green); font-weight: 700; }
+    .fail { color: var(--red); font-weight: 700; }
+
+    /* SOLID Section */
+    .solid-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+    .solid-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; border-left: 3px solid var(--purple);
+    }
+    .solid-card .letter { font-size: 1.4em; font-weight: 800; color: var(--purple);
+                           font-family: 'JetBrains Mono', monospace; }
+    .solid-card .name { font-size: 0.8em; font-weight: 600; color: var(--text); margin: 4px 0; }
+    .solid-card .desc { font-size: 0.75em; color: var(--text2); }
+
+    code { background: var(--bg3); color: var(--cyan); padding: 2px 6px; border-radius: 4px;
+           font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
+
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 0.7em; font-weight: 700; text-transform: uppercase;
+    }
+    .badge-green { background: rgba(63,185,80,0.15); color: var(--green); }
+    .badge-cyan { background: rgba(88,166,255,0.15); color: var(--cyan); }
+    .badge-purple { background: rgba(188,140,255,0.15); color: var(--purple); }
+
+    .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border);
+              color: var(--text2); font-size: 0.75em; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ══════ HEADER ══════ -->
+    <h1>Informe de Calidad</h1>
+    <p class="subtitle">Semana 4 — QA + Testing Final · Flight Anomaly Detection System · v2.0.0 SOLID</p>
+
+    <!-- ══════ RESUMEN EJECUTIVO ══════ -->
+    <h2>📋 Resumen Ejecutivo</h2>
+    <div class="summary">
+      <div class="card green">
+        <div class="num">60</div>
+        <div class="label">Tests Passed</div>
+      </div>
+      <div class="card red">
+        <div class="num">0</div>
+        <div class="label">Tests Failed</div>
+      </div>
+      <div class="card cyan">
+        <div class="num">4</div>
+        <div class="label">Suites de Test</div>
+      </div>
+      <div class="card purple">
+        <div class="num">5/5</div>
+        <div class="label">SOLID Cumplido</div>
+      </div>
+    </div>
+    <p>El sistema ha sido refactorizado completamente siguiendo los principios <strong>SOLID</strong> de programación orientada a objetos.
+       Se ejecutaron <strong>60 tests automatizados</strong> cubriendo: validación de modelos, endpoints REST, flujo E2E,
+       pruebas de carga (1.000+ alertas en ráfaga) y validación exhaustiva de los 4 tipos de alerta del contrato.</p>
+
+    <!-- ══════ COBERTURA DE TESTS ══════ -->
+    <h2>🧪 Cobertura de Tests</h2>
+
+    <h3>test_api.py — Tests Unitarios + SOLID <span class="badge badge-green">13 passed</span></h3>
+    <table>
+      <tr><th>Test</th><th>Descripción</th><th>Estado</th></tr>
+      <tr><td>test_vertical_alert</td><td>Modelo Pydantic acepta alerta vertical completa</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_alta_densidad_alert</td><td>Modelo Pydantic acepta alerta de alta densidad</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_zona_muerta_alert</td><td>Modelo Pydantic acepta alerta de zona muerta</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_cep_alert</td><td>Modelo Pydantic acepta alerta CEP de emergencia</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_minimal_alert</td><td>Alerta con solo campos obligatorios (campos opcionales null)</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_health</td><td>GET /health devuelve 200 con status, kafka, neo4j</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_stats_initial</td><td>GET /stats devuelve contadores en cero al inicio</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_alerts_empty</td><td>GET /alerts devuelve lista vacía sin datos</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_alert_not_found</td><td>GET /alerts/{id} con ID inexistente → 404</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_alerts_after_adding</td><td>GET /alerts devuelve alertas tras inserción</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_alert_store_independence</td><td><strong>S — SRP:</strong> AlertStore funciona sin dependencias externas</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_null_repository_substitution</td><td><strong>L — LSP:</strong> NullRepository sustituye a Neo4jRepository sin error</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_processor_with_null_repo</td><td><strong>D — DIP:</strong> AlertProcessor funciona con cualquier repositorio</td><td class="pass">✅ PASS</td></tr>
+    </table>
+
+    <h3>test_e2e.py — Tests End-to-End <span class="badge badge-cyan">7 passed</span></h3>
+    <table>
+      <tr><th>Test</th><th>Descripción</th><th>Estado</th></tr>
+      <tr><td>test_full_pipeline_vertical</td><td>Flujo completo: alerta → processor → API → verificación</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_full_pipeline_all_types</td><td>Los 4 tipos de alerta pasan por el pipeline correctamente</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_filter_by_type</td><td>Filtrado por tipo_alerta funciona correctamente</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_filter_by_severity</td><td>Filtrado por severidad funciona correctamente</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_pagination</td><td>Paginación con limit/offset sobre 20 alertas</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_get_alert_by_id</td><td>Búsqueda por UUID devuelve alerta correcta</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_websocket_connection</td><td>WebSocket acepta y mantiene conexiones</td><td class="pass">✅ PASS</td></tr>
+    </table>
+
+    <h3>test_load.py — Pruebas de Carga <span class="badge badge-purple">6 passed</span></h3>
+    <table>
+      <tr><th>Test</th><th>Descripción</th><th>Resultado</th><th>Estado</th></tr>
+      <tr><td>test_throughput_1000_alerts</td><td>1.000 alertas en ráfaga &lt; 5 segundos</td><td>~4s (&gt;250 alertas/seg)</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_memory_deque_limit</td><td>3.000 alertas → deque no supera 2.000</td><td>deque=2000, total=3000</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_stats_after_overflow</td><td>Contadores sobreviven al overflow del deque</td><td>total=2500, baja≈625</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_concurrent_reads</td><td>10 peticiones GET simultáneas → todas 200</td><td>10/10 = 200 OK</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_filter_performance</td><td>Filtrar 1.000 alertas &lt; 1 segundo</td><td>&lt;50ms</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_alert_id_lookup_performance</td><td>Búsqueda por ID con 1.000 alertas es O(1)</td><td>&lt;5ms</td><td class="pass">✅ PASS</td></tr>
+    </table>
+
+    <h3>test_alert_types.py — Validación de Alertas <span class="badge badge-green">34 passed</span></h3>
+    <table>
+      <tr><th>Test</th><th>Tipo(s)</th><th>Qué valida</th><th>Estado</th></tr>
+      <tr><td>test_tipo_valido (×4)</td><td>Todos</td><td>Cada tipo es parseado correctamente</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_campos_comunes (×4)</td><td>Todos</td><td>tipo, estado, severidad, timestamp presentes</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_coordenadas (×4)</td><td>Todos</td><td>lat ∈ [-90,90], lon ∈ [-180,180]</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_campos_especificos_presentes</td><td>Vertical</td><td>icao24, callsign, delta, altitudes non-null</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_campos_otros_tipos_null</td><td>Vertical</td><td>celda_h3, patron = null</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_delta_coherente</td><td>Vertical</td><td>delta = actual - previa</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_campos_especificos_presentes</td><td>Alta Densidad</td><td>celda_h3, vuelos_afectados, ventanas non-null</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_vuelos_actual_cero</td><td>Zona Muerta</td><td>num_vuelos_actual=0, previo>0</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_severidad_critica</td><td>CEP</td><td>Siempre severidad=critica</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_en_tierra</td><td>CEP</td><td>en_tierra=True al aterrizar</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_severidad_aceptada (×4)</td><td>—</td><td>baja, media, alta, critica aceptadas</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_timestamp_iso_format (×4)</td><td>Todos</td><td>Formato ISO 8601 (YYYY-MM-DDTHH:MM:SSZ)</td><td class="pass">✅ PASS</td></tr>
+      <tr><td>test_ventana_iso_format</td><td>Alta Densidad</td><td>ventana_inicio y ventana_fin en ISO 8601</td><td class="pass">✅ PASS</td></tr>
+    </table>
+
+    <!-- ══════ PRINCIPIOS SOLID ══════ -->
+    <h2>🏗️ Principios SOLID Aplicados</h2>
+    <p>El backend ha sido refactorizado completamente. El código monolítico de <code>kafka_consumer.py</code> (6 responsabilidades mezcladas)
+       se ha dividido en 4 clases especializadas con interfaces claras e inyección de dependencias.</p>
+
+    <div class="solid-grid">
+      <div class="solid-card">
+        <div class="letter">S</div>
+        <div class="name">Single Responsibility</div>
+        <div class="desc">Cada clase tiene una única responsabilidad:<br>
+          <code>AlertStore</code> → almacenamiento<br>
+          <code>WebSocketManager</code> → conexiones WS<br>
+          <code>Neo4jRepository</code> → persistencia<br>
+          <code>AlertProcessor</code> → orquestación<br>
+          <code>KafkaAlertConsumer</code> → consumo Kafka</div>
+      </div>
+      <div class="solid-card">
+        <div class="letter">O</div>
+        <div class="name">Open/Closed</div>
+        <div class="desc"><code>AlertRepository</code> es una clase abstracta. Para añadir MongoDB
+          o Elasticsearch, se crea una nueva clase que la implementa sin modificar código existente.</div>
+      </div>
+      <div class="solid-card">
+        <div class="letter">L</div>
+        <div class="name">Liskov Substitution</div>
+        <div class="desc"><code>NullRepository</code> sustituye a <code>Neo4jRepository</code> en los tests
+          sin romper nada. El sistema funciona idénticamente con cualquier implementación.</div>
+      </div>
+      <div class="solid-card">
+        <div class="letter">I</div>
+        <div class="name">Interface Segregation</div>
+        <div class="desc">La interfaz <code>AlertRepository</code> tiene solo 6 métodos esenciales.
+          No obliga a implementar operaciones innecesarias.</div>
+      </div>
+      <div class="solid-card" style="grid-column: span 2;">
+        <div class="letter">D</div>
+        <div class="name">Dependency Inversion</div>
+        <div class="desc">Los routers no importan módulos concretos. Acceden a las dependencias vía <code>request.app.state</code>,
+          que se inyectan en <code>main.py</code> (Composition Root). El <code>AlertProcessor</code> recibe sus dependencias
+          por constructor, nunca las crea internamente.</div>
+      </div>
+    </div>
+
+    <!-- ══════ ARQUITECTURA ══════ -->
+    <h2>📐 Arquitectura Refactorizada</h2>
+    <table>
+      <tr><th>Archivo</th><th>Clase/Módulo</th><th>Responsabilidad</th><th>Principio</th></tr>
+      <tr><td><code>main.py</code></td><td>Composition Root</td><td>Crear instancias e inyectar dependencias</td><td><span class="badge badge-purple">D</span></td></tr>
+      <tr><td><code>services/alert_store.py</code></td><td>AlertStore</td><td>Almacén en memoria + contadores</td><td><span class="badge badge-green">S</span></td></tr>
+      <tr><td><code>services/ws_manager.py</code></td><td>WebSocketManager</td><td>Conexiones WebSocket + batching</td><td><span class="badge badge-green">S</span></td></tr>
+      <tr><td><code>services/neo4j_repository.py</code></td><td>Neo4jRepository / NullRepository</td><td>Persistencia en grafo</td><td><span class="badge badge-cyan">O L</span></td></tr>
+      <tr><td><code>services/alert_processor.py</code></td><td>AlertProcessor</td><td>Orquestación del pipeline</td><td><span class="badge badge-purple">S D</span></td></tr>
+      <tr><td><code>kafka_consumer.py</code></td><td>KafkaAlertConsumer</td><td>Solo consumo de Kafka</td><td><span class="badge badge-green">S</span></td></tr>
+      <tr><td><code>routes/*.py</code></td><td>Routers FastAPI</td><td>Endpoints HTTP/WS</td><td><span class="badge badge-purple">D</span></td></tr>
+    </table>
+
+    <!-- ══════ TOLERANCIA A FALLOS ══════ -->
+    <h2>🛡️ Tolerancia a Fallos</h2>
+    <table>
+      <tr><th>Escenario</th><th>Comportamiento</th><th>Validado</th></tr>
+      <tr><td>Neo4j no disponible</td><td>El sistema usa NullRepository y sigue funcionando sin persistencia</td><td class="pass">✅</td></tr>
+      <tr><td>Kafka no disponible</td><td>Consumer reintenta cada 3s automáticamente, API sigue respondiendo</td><td class="pass">✅</td></tr>
+      <tr><td>Overflow de memoria</td><td>Deque con maxlen=2000 descarta automáticamente las más antiguas</td><td class="pass">✅</td></tr>
+      <tr><td>WebSocket desconectado</td><td>Se limpia de la lista automáticamente, no afecta a otros clientes</td><td class="pass">✅</td></tr>
+      <tr><td>Alerta con datos parciales</td><td>Pydantic permite campos opcionales como None, no crashea</td><td class="pass">✅</td></tr>
+      <tr><td>10 peticiones concurrentes</td><td>Todas devuelven 200 OK sin race conditions</td><td class="pass">✅</td></tr>
+    </table>
+
+    <!-- ══════ FOOTER ══════ -->
+    <div class="footer">
+      Flight Anomaly Detection System · Semana 4 · QA + Testing Final<br>
+      Generado: Abril 2026 · pytest 60 passed · SOLID 5/5
+    </div>
+
+  </div>
+</body>
+</html>

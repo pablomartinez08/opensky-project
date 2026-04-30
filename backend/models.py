@@ -44,6 +44,7 @@ class FlightAlert(BaseModel):
     altitud_inicio_patron: Optional[float] = None
     altitud_final: Optional[float] = None
     duracion_vel_cero_seg: Optional[float] = None
+    threshold_dinamico: Optional[float] = None    # Umbral dinámico (alta_densidad)
 
 
 # ══════════════════════════════════════════════════════════════

@@ -1,9 +1,12 @@
 """
-Main — FastAPI Application
-Sistema de Detección de Anomalías Aéreas - Backend API
+Main — FastAPI Application (Refactorizado SOLID).
+
+Composition Root: aquí se crean todas las instancias y se inyectan
+las dependencias. Ningún otro módulo hace 'new' ni importa globales.
 """
 import asyncio
 import logging
+from datetime import datetime
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -13,8 +16,12 @@ from fastapi.staticfiles import StaticFiles
 from routes.health import router as health_router
 from routes.alerts import router as alerts_router
 from routes.websocket import router as ws_router
-from kafka_consumer import consume_alerts
-from neo4j_client import close_driver
+
+from services.alert_store import AlertStore
+from services.ws_manager import WebSocketManager
+from services.neo4j_repository import Neo4jRepository
+from services.alert_processor import AlertProcessor
+from kafka_consumer import KafkaAlertConsumer
 
 # ══════════════════════════════════════════════════════════════
 # Logging
@@ -28,28 +35,54 @@ logger = logging.getLogger(__name__)
 
 
 # ══════════════════════════════════════════════════════════════
-# Lifespan: arranca el consumer Kafka al iniciar la app
+# Lifespan — Composition Root (Dependency Injection)
 # ══════════════════════════════════════════════════════════════
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Ciclo de vida de la app: arranca y para el consumer de Kafka."""
+    """
+    Ciclo de vida de la app.
+    Aquí se crean TODAS las instancias y se inyectan como dependencias.
+    """
     logger.info("═" * 60)
-    logger.info("  🚀 Backend API — Sistema de Anomalías Aéreas")
+    logger.info("  🚀 Backend API — Sistema de Anomalías Aéreas (SOLID)")
     logger.info("  📥 Consumer:  Kafka topic 'flight-alerts'")
     logger.info("  🕸️  Grafo:     Neo4j (bolt://neo4j:7687)")
     logger.info("  🔌 WebSocket: ws://localhost:8000/ws/alerts")
     logger.info("═" * 60)
 
-    # Arrancar consumer en background
-    task = asyncio.create_task(consume_alerts())
+    # ── 1. Crear instancias (Principio D: inyección por constructor) ──
+    store = AlertStore(maxlen=2000)
+    ws_manager = WebSocketManager(flush_interval=0.5)
+    repository = Neo4jRepository()
+    processor = AlertProcessor(store=store, ws_manager=ws_manager, repository=repository)
+    consumer = KafkaAlertConsumer(processor=processor)
+
+    # ── 2. Inyectar en app.state para que los routers accedan ──
+    app.state.alert_store = store
+    app.state.ws_manager = ws_manager
+    app.state.repository = repository
+    app.state.processor = processor
+    app.state.kafka_consumer = consumer
+    app.state.start_time = datetime.utcnow()
+
+    # ── 3. Arrancar tareas en background ──
+    consumer_task = asyncio.create_task(consumer.consume())
+    ws_flush_task = asyncio.create_task(ws_manager.flush_loop())
+
     yield
-    # Parar consumer y cerrar Neo4j al shutdown
-    task.cancel()
+
+    # ── 4. Shutdown limpio ──
+    consumer_task.cancel()
+    ws_flush_task.cancel()
     try:
-        await task
+        await consumer_task
     except asyncio.CancelledError:
         pass
-    close_driver()
+    try:
+        await ws_flush_task
+    except asyncio.CancelledError:
+        pass
+    repository.close()
     logger.info("🛑 Backend detenido")
 
 
@@ -58,12 +91,12 @@ async def lifespan(app: FastAPI):
 # ══════════════════════════════════════════════════════════════
 app = FastAPI(
     title="Flight Anomaly Detection API",
-    description="Backend para el sistema de detección de anomalías aéreas en tiempo real",
-    version="1.0.0",
+    description="Backend SOLID para el sistema de detección de anomalías aéreas en tiempo real",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
-# CORS: permitir conexiones del frontend
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
