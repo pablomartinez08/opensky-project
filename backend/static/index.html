@@ -200,7 +200,8 @@
           <button class="filter-btn" data-filter="vertical">⚠️ Vertical</button>
           <button class="filter-btn" data-filter="alta_densidad">📡 Densidad</button>
           <button class="filter-btn" data-filter="zona_muerta">🗺️ Zona Muerta</button>
-          <button class="filter-btn" data-filter="cep_aterrizaje_emergencia">🧩 CEP</button>
+          <button class="filter-btn" data-filter="cep_zona_problematica">🌩️ Zona CEP</button>
+          <button class="filter-btn" data-filter="cep_aterrizaje_emergencia">🧩 Aterrizaje CEP</button>
           <button class="filter-btn" data-filter="critica" style="margin-left:auto;">🔴 Crítica</button>
         </div>
       </div>
@@ -228,12 +229,14 @@
       vertical: '#f43f5e',
       alta_densidad: '#f97316',
       zona_muerta: '#3b82f6',
+      cep_zona_problematica: '#22d3ee',
       cep_aterrizaje_emergencia: '#a855f7',
     };
     const ALERT_ICONS = {
       vertical: '⚠️',
       alta_densidad: '📡',
       zona_muerta: '🗺️',
+      cep_zona_problematica: '🌩️',
       cep_aterrizaje_emergencia: '🧩',
     };
 
@@ -376,6 +379,11 @@
           <b>Celda H3:</b> ${a.celda_h3 || 'N/A'}<br>
           <b>Vuelos ahora:</b> ${a.num_vuelos_actual || 0}<br>
           <b>Vuelos antes:</b> ${a.num_vuelos_previo || 0}`;
+      } else if (a.tipo_alerta === 'cep_zona_problematica') {
+        details = `
+          <b>Patrón:</b> ${a.patron || 'N/A'}<br>
+          <b>Vuelos nuevos:</b> ${a.num_vuelos_actual || 0}<br>
+          <b>Vuelos previos:</b> ${a.num_vuelos_previo || 0}`;
       } else if (a.tipo_alerta === 'cep_aterrizaje_emergencia') {
         details = `
           <b>Callsign:</b> ${a.callsign || 'N/A'}<br>
@@ -436,6 +444,8 @@
         body = `Celda <strong>${(a.celda_h3 || '').slice(-7)}</strong> — ${a.num_vuelos_actual || 0} vuelos`;
       } else if (a.tipo_alerta === 'zona_muerta') {
         body = `Celda <strong>${(a.celda_h3 || '').slice(-7)}</strong> — ${a.num_vuelos_previo || 0}→${a.num_vuelos_actual || 0}`;
+      } else if (a.tipo_alerta === 'cep_zona_problematica') {
+        body = `<strong>Zona problemática</strong> — ${a.patron || 'patrón detectado'}`;
       } else if (a.tipo_alerta === 'cep_aterrizaje_emergencia') {
         body = `<strong>${a.callsign || a.icao24 || 'N/A'}</strong> — ${a.patron || 'patrón detectado'}`;
       }

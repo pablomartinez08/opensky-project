@@ -65,7 +65,7 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 2
+        taskmanager.numberOfTaskSlots: 4
     volumes:
       - ./flink_app:/opt/flink/flink_app
     networks:
@@ -82,7 +82,47 @@ services:
     command: bash -lc "sleep 30 && /opt/flink/bin/flink run -d -m jobmanager:8081 -py /opt/flink/flink_app/density_alert.py; tail -f /dev/null"
     networks:
       - flink-network
-  # ──── NEO4J (Persistencia de Grafos) ───────────────────────────
+
+  vertical-detector:
+    build: .
+    depends_on:
+      - kafka
+      - jobmanager
+      - taskmanager
+    volumes:
+      - ./flink_app:/opt/flink/flink_app
+    command: bash -lc "sleep 35 && /opt/flink/bin/flink run -d -m jobmanager:8081 -py /opt/flink/flink_app/vertical_detector.py; tail -f /dev/null"
+    networks:
+      - flink-network
+
+  dead-zone-detector:
+    build: .
+    depends_on:
+      - kafka
+      - jobmanager
+      - taskmanager
+    volumes:
+      - ./flink_app:/opt/flink/flink_app
+    command: bash -lc "sleep 35 && /opt/flink/bin/flink run -d -m jobmanager:8081 -py /opt/flink/flink_app/dead_zone_detector.py; tail -f /dev/null"
+    networks:
+      - flink-network
+
+  cep-alert-correlator:
+    build: .
+    depends_on:
+      - kafka
+      - jobmanager
+      - taskmanager
+      - density-alert
+      - dead-zone-detector
+      - vertical-detector
+    volumes:
+      - ./flink_app:/opt/flink/flink_app
+    command: bash -lc "sleep 45 && /opt/flink/bin/flink run -d -m jobmanager:8081 -py /opt/flink/flink_app/cep_alert_correlator.py; tail -f /dev/null"
+    networks:
+      - flink-network
+
+  # NEO4J (Persistencia de Grafos)
   neo4j:
     image: neo4j:5-community
     ports:

@@ -15,7 +15,13 @@ from models import FlightAlert
 # ══════════════════════════════════════════════════════════════
 # Constantes de validación
 # ══════════════════════════════════════════════════════════════
-TIPOS_VALIDOS = {"vertical", "alta_densidad", "zona_muerta", "cep_aterrizaje_emergencia"}
+TIPOS_VALIDOS = {
+    "vertical",
+    "alta_densidad",
+    "zona_muerta",
+    "cep_zona_problematica",
+    "cep_aterrizaje_emergencia",
+}
 ESTADOS_VALIDOS = {"inicio", "actualizacion", "fin"}
 SEVERIDADES_VALIDAS = {"baja", "media", "alta", "critica"}
 ISO_8601_REGEX = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -46,6 +52,14 @@ EJEMPLOS = {
         "timestamp": "2026-03-24T18:30:00Z", "latitud": 42.78, "longitud": 0.56,
         "celda_h3": "841f91fffffffff", "num_vuelos_actual": 0, "num_vuelos_previo": 12,
         "ventana_inicio": "2026-03-24T18:25:00Z", "ventana_fin": "2026-03-24T18:30:00Z",
+    },
+    "cep_zona_problematica": {
+        "tipo_alerta": "cep_zona_problematica", "estado": "inicio",
+        "severidad": "alta", "timestamp": "2026-03-24T18:31:00Z",
+        "latitud": 42.78, "longitud": 0.56,
+        "num_vuelos_actual": 28, "num_vuelos_previo": 12,
+        "patron": "zona_muerta -> densidad_contigua",
+        "ventana_inicio": "2026-03-24T18:25:00Z", "ventana_fin": "2026-03-24T18:31:00Z",
     },
     "cep_aterrizaje_emergencia": {
         "tipo_alerta": "cep_aterrizaje_emergencia", "estado": "fin",

@@ -1,5 +1,25 @@
 # opensky-project
 
+## Detector de zonas muertas
+
+El `docker-compose.yml` ya levanta el job `dead-zone-detector`, que ejecuta `flink_app/dead_zone_detector.py` en el cluster Flink. Este job consume `flight_data`, agrupa por celda H3 y publica alertas `zona_muerta` en `flight-alerts` cuando una celda pasa de muchos vuelos a muy pocos o ninguno entre ventanas de 60 segundos.
+
+Tambien levanta el job `cep-alert-correlator`, que ejecuta `flink_app/cep_alert_correlator.py`. Este job consume las alertas `vertical`, `alta_densidad` y `zona_muerta` desde `flight-alerts`, detecta patrones compuestos del UC-04 y publica alertas `cep_zona_problematica` o `cep_aterrizaje_emergencia` en el mismo topic.
+
+Para probarlo con datos simulados:
+
+```bash
+cd producer
+python mock_dead_zone_producer.py
+```
+
+Para probar el correlador CEP directamente:
+
+```bash
+cd producer
+python mock_cep_producer.py
+```
+
 ## Descripción
 
 Este repositorio incluye una topología Flink en `opensky-project` que procesa datos de vuelos desde Kafka, genera alertas verticales y de alta densidad, e integra todo en un clúster local con Docker.

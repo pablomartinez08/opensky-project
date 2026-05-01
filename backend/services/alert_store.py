@@ -31,6 +31,7 @@ class AlertStore:
                 "vertical": 0,
                 "alta_densidad": 0,
                 "zona_muerta": 0,
+                "cep_zona_problematica": 0,
                 "cep_aterrizaje_emergencia": 0,
             },
             "por_severidad": {

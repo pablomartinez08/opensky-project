@@ -16,7 +16,7 @@ class FlightAlert(BaseModel):
     id: Optional[str] = None
 
     # ── Campos comunes (SIEMPRE presentes) ──
-    tipo_alerta: str            # vertical | alta_densidad | zona_muerta | cep_aterrizaje_emergencia
+    tipo_alerta: str            # vertical | alta_densidad | zona_muerta | cep_zona_problematica | cep_aterrizaje_emergencia
     estado: str                 # inicio | actualizacion | fin
     severidad: str              # baja | media | alta | critica
     timestamp: str              # ISO 8601
