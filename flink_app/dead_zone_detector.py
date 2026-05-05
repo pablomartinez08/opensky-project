@@ -53,7 +53,7 @@ def cell_to_latlng(cell):
 
 
 class ParseJsonFunction(MapFunction):
-    """Parsea el JSON crudo de Kafka y descarta lecturas sin posicion."""
+    """Parsea el JSON crudo de Kafka y descarta lecturas sin posicion"""
 
     def map(self, value):
         try:
@@ -70,7 +70,7 @@ class ParseJsonFunction(MapFunction):
 
 
 class AddH3Cell(MapFunction):
-    """Anade la celda H3 al evento de vuelo."""
+    """Añade la celda H3 al evento de vuelo"""
 
     def map(self, flight):
         try:

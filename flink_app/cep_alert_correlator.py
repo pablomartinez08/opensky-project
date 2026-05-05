@@ -9,9 +9,6 @@ Patrones implementados:
      emite 'cep_zona_problematica' por posible meteorologia o cierre de zona.
   2) alerta vertical con descenso fuerte y altitud final cercana a cero:
      emite 'cep_aterrizaje_emergencia' por posible aterrizaje de emergencia.
-
-Importante: el job ignora las alertas CEP para evitar realimentarse con sus
-propias salidas.
 """
 
 import json
@@ -67,7 +64,7 @@ def max_severity(*values):
 
 
 class ParseAlert(MapFunction):
-    """Parsea alertas JSON y descarta las alertas CEP para evitar feedback loop."""
+    """Parsea alertas JSON y descarta las alertas CEP para evitar bucles"""
 
     def map(self, value):
         try:
@@ -82,7 +79,7 @@ class ParseAlert(MapFunction):
 
 
 class CepCorrelator(KeyedProcessFunction):
-    """Mantiene estado global reciente para correlacionar alertas heterogeneas."""
+    """Mantiene estado global reciente para correlacionar alertas """
 
     def open(self, runtime_context: RuntimeContext):
         self.state = runtime_context.get_state(
