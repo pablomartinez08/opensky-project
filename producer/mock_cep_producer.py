@@ -105,10 +105,10 @@ def vertical_emergency_alert():
     alert = base_alert("vertical", severidad="critica")
     alert.update(
         {
-            "origen_pais": "Mock Country",
+            "origen_pais": "Eswatini",
             "en_tierra": True,
             "icao24": "cep999",
-            "callsign": "CEP-TEST",
+            "callsign": "BOCKK04",
             "altitud_actual": 0,
             "altitud_previa": 1400,
             "delta_altitud": -1400,

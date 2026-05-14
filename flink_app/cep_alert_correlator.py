@@ -151,6 +151,7 @@ class CepCorrelator(KeyedProcessFunction):
         alert["origen_pais"] = None
         alert["velocidad_kmh"] = None
         alert["heading"] = None
+        alert["celda_h3"] = dead_zone.get("celda_h3")
         alert["num_vuelos_actual"] = density_zone.get("num_vuelos_actual")
         alert["num_vuelos_previo"] = dead_zone.get("num_vuelos_previo")
         alert["ventana_inicio"] = dead_zone.get("ventana_inicio")

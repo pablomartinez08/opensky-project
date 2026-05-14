@@ -251,6 +251,7 @@
     let totalAlertas = 0;
     let totalCriticas = 0;
     let renderScheduled = false;
+    let seenAlertKeys = new Set();
 
     // ══════════════════════════════════════════════════════════════
     // MAP — Canvas renderer (10x más rápido que SVG/DOM)
@@ -313,7 +314,26 @@
     // ══════════════════════════════════════════════════════════════
     // ALERT HANDLING
     // ══════════════════════════════════════════════════════════════
+    function getAlertKey(alerta) {
+      if (alerta && alerta.id) return `id:${alerta.id}`;
+      return [
+        alerta?.tipo_alerta || '',
+        alerta?.estado || '',
+        alerta?.severidad || '',
+        alerta?.timestamp || '',
+        alerta?.celda_h3 || '',
+        alerta?.icao24 || '',
+        alerta?.callsign || '',
+        alerta?.latitud ?? '',
+        alerta?.longitud ?? '',
+      ].join('|');
+    }
+
     function handleNewAlert(alerta) {
+      const key = getAlertKey(alerta);
+      if (seenAlertKeys.has(key)) return;
+      seenAlertKeys.add(key);
+
       alerts.unshift(alerta);
       // Mantener array controlado para no crecer infinito
       if (alerts.length > 2000) alerts.length = 2000;
@@ -381,8 +401,8 @@
           <b>Vuelos antes:</b> ${a.num_vuelos_previo || 0}`;
       } else if (a.tipo_alerta === 'cep_zona_problematica') {
         details = `
-          <b>Patrón:</b> ${a.patron || 'N/A'}<br>
-          <b>Vuelos nuevos:</b> ${a.num_vuelos_actual || 0}<br>
+          <b>Celda H3:</b> ${a.celda_h3 || 'N/A'}<br>
+          <b>Vuelos evitados:</b> ${a.num_vuelos_actual || 0}<br>
           <b>Vuelos previos:</b> ${a.num_vuelos_previo || 0}`;
       } else if (a.tipo_alerta === 'cep_aterrizaje_emergencia') {
         details = `
@@ -441,24 +461,28 @@
       if (a.tipo_alerta === 'vertical') {
         body = `<strong>${a.callsign || a.icao24 || 'N/A'}</strong> — Δ${a.delta_altitud ?? 0}m · ${a.velocidad_kmh ?? 0} km/h`;
       } else if (a.tipo_alerta === 'alta_densidad') {
-        body = `Celda <strong>${(a.celda_h3 || '').slice(-7)}</strong> — ${a.num_vuelos_actual || 0} vuelos`;
+        body = `Celda <strong>${a.celda_h3 || 'N/A'}</strong> — ${a.num_vuelos_actual || 0} vuelos`;
       } else if (a.tipo_alerta === 'zona_muerta') {
-        body = `Celda <strong>${(a.celda_h3 || '').slice(-7)}</strong> — ${a.num_vuelos_previo || 0}→${a.num_vuelos_actual || 0}`;
+        body = `Celda <strong>${a.celda_h3 || 'N/A'}</strong> — ${a.num_vuelos_previo || 0}→${a.num_vuelos_actual || 0}`;
       } else if (a.tipo_alerta === 'cep_zona_problematica') {
-        body = `<strong>Zona problemática</strong> — ${a.patron || 'patrón detectado'}`;
+        body = `Celda <strong>${a.celda_h3 || 'N/A'}</strong> — ${a.num_vuelos_actual || 0} vuelos evitando · previos: ${a.num_vuelos_previo || 0}`;
       } else if (a.tipo_alerta === 'cep_aterrizaje_emergencia') {
         body = `<strong>${a.callsign || a.icao24 || 'N/A'}</strong> — ${a.patron || 'patrón detectado'}`;
       }
 
+      const locationLabel = (a.tipo_alerta === 'vertical')
+        ? (a.origen_pais || a.callsign || a.icao24 || 'N/A')
+        : (a.origen_pais || 'N/A');
+
       return `
-        <div class="alert-card sev-${a.severidad}" onclick="flyTo(${a.latitud},${a.longitud})">
-          <div class="card-top">
-            <span class="card-type" style="color:${ALERT_COLORS[a.tipo_alerta]}">${icon} ${a.tipo_alerta}</span>
-            <span class="card-sev">${a.severidad}</span>
-          </div>
-          <div class="card-body">${body}</div>
-          <div class="card-time">${a.estado} · ${a.origen_pais || 'Zona'} · ${a.timestamp || ''}</div>
-        </div>`;
+          <div class="alert-card sev-${a.severidad}" onclick="flyTo(${a.latitud},${a.longitud})">
+            <div class="card-top">
+              <span class="card-type" style="color:${ALERT_COLORS[a.tipo_alerta]}">${icon} ${a.tipo_alerta}</span>
+              <span class="card-sev">${a.severidad}</span>
+            </div>
+            <div class="card-body">${body}</div>
+            <div class="card-time">${a.estado} · ${locationLabel} · ${a.timestamp || ''}</div>
+          </div>`;
     }
 
     function flyTo(lat, lon) {
@@ -490,8 +514,7 @@
         if (alertRes.ok) {
           const data = await alertRes.json();
           data.alertas.forEach(a => {
-            alerts.push(a);
-            addMarker(a);
+            handleNewAlert(a);
           });
         }
         if (statsRes.ok) {

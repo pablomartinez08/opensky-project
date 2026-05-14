@@ -22,7 +22,7 @@ from kafka import KafkaProducer
 KAFKA_SERVER = "localhost:9094"
 TOPIC = "flight_data"
 
-# Madrid. Con jitter pequeno, todos los vuelos caen en la misma celda H3 res=5.
+# Madrid. Con jitter pequeño, todos los vuelos caen en la misma celda H3 res=5.
 CENTER_LAT = 40.4167
 CENTER_LNG = -3.7037
 
